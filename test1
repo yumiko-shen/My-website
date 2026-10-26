@@ -494,7 +494,7 @@
             app.innerHTML = html;
         }
 
-        // 初始化加载
+        // 初始化加载 
         window.onload = () => {
             render();
         };
