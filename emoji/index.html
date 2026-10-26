@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>测测你的本命表情包 | 你的精神状态属于哪张图？</title>
+    <!-- 引入全局密码本 -->
+    <script src="../config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        morandi: {
+                            bg: '#FDFBF7',      // 奶油黄背景
+                            card: '#FFFFFF',    // 卡片白
+                            text: '#4A4A4A',    // 深灰文字
+                            subtext: '#8A8680', // 浅灰次要文字
+                            border: '#F4EFE6',  // 燕麦色边框
+                            primary: '#F9E8E1', // 浅蜜桃粉主色调
+                            primaryDark: '#E8D2C8', // 蜜桃粉按下状态
+                            tag: '#F4EFE6',     // 燕麦色标签
+                            tagText: '#7A756D', // 标签文字
+                            error: '#D4A398'    // 莫兰迪红错误提示
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"PingFang SC"', '"Helvetica Neue"', 'STHeiti', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FDFBF7;
+            color: #4A4A4A;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-morandi-primary selection:text-morandi-text">
+
+    <!-- 顶部固定标题 -->
+    <header class="fixed top-0 w-full bg-white/70 backdrop-blur-md border-b border-morandi-border z-50 transition-all">
+        <div class="max-w-md mx-auto px-4 h-12 flex items-center justify-center">
+            <h1 class="text-sm font-medium text-morandi-text truncate tracking-wide">
+                测测你的本命表情包 | 你的精神状态属于哪张图？
+            </h1>
+        </div>
+    </header>
+
+    <!-- 主体内容区 -->
+    <main id="app" class="flex-1 w-full max-w-md mx-auto pt-16 pb-8 px-4 flex flex-col relative">
+        <!-- 内容由JS动态渲染 -->
+    </main>
+
+    <script>
+        // --- 1. 题目数据 (15题) ---
+        const questions = [
+            {
+                question: "1. 微信群聊突然有人@所有人，你的第一反应是？",
+                options: [
+                    { text: "立刻装死，只要我不回复，任务就找不到我", tags: ["escape", "numb", "capybara"] },
+                    { text: "心里暗骂一句，然后无奈回复“收到”", tags: ["work", "malo", "tired"] },
+                    { text: "火速前排吃瓜，看看又是哪个倒霉蛋惹事了", tags: ["drama", "troll", "rabbit"] },
+                    { text: "波澜不惊地看完，顺便发个阴阳怪气的表情包", tags: ["sassy", "dog", "smile"] }
+                ]
+            },
+            {
+                question: "2. 周末原本约了朋友，对方突然说鸽了，你会？",
+                options: [
+                    { text: "内心狂喜！终于可以名正言顺地躺在家里烂掉了", tags: ["lazy", "numb", "capybara"] },
+                    { text: "瞬间暴走，老子妆都画好了你跟我说这个？！", tags: ["angry", "cat", "rabbit"] },
+                    { text: "无所谓，刚好自己去喝杯咖啡享受独处", tags: ["elegant", "zen"] },
+                    { text: "发一个流汗黄豆，然后把对方拉进“暗杀名单”三天", tags: ["troll", "sweat", "sassy"] }
+                ]
+            },
+            {
+                question: "3. 你在日常生活中最常脱口而出的口头禅是？",
+                options: [
+                    { text: "“行吧”、“随便”、“都可以” (无所谓，我会妥协)", tags: ["zen", "capybara", "numb"] },
+                    { text: "“真的会谢”、“毁灭吧赶紧的” (日常崩溃边缘)", tags: ["malo", "tired", "sweat"] },
+                    { text: "“哈？”、“你在教我做事？” (随时准备战斗)", tags: ["angry", "sassy", "babi"] },
+                    { text: "“哈哈哈哈哈” (用大笑掩饰一切尴尬和内心OS)", tags: ["troll", "smile", "rabbit"] }
+                ]
+            },
+            {
+                question: "4. 遇到让你觉得极其无语、无法理解的奇葩要求时：",
+                options: [
+                    { text: "在心里敲木鱼，默念莫生气气出病来无人替", tags: ["zen", "fish", "elegant"] },
+                    { text: "翻个巨大的白眼，直接开怼，主打一个不内耗", tags: ["sassy", "cat", "babi"] },
+                    { text: "表面微笑着答应，背后疯狂吐槽发疯", tags: ["smile", "malo", "tired"] },
+                    { text: "截图发给闺蜜/好兄弟，开始长达半小时的批斗大会", tags: ["drama", "rabbit"] }
+                ]
+            },
+            {
+                question: "5. 你的“社交电池”通常属于什么容量？",
+                options: [
+                    { text: "充电两小时，通话五分钟，极度容易耗尽", tags: ["lazy", "tired", "malo"] },
+                    { text: "看对面是谁，遇到喜欢的人超长待机，讨厌的人秒关机", tags: ["sassy", "dog", "elegant"] },
+                    { text: "一直处于稳定低电量模式，不热情也不冷漠", tags: ["zen", "capybara"] },
+                    { text: "社交恐怖分子，只要有热闹凑永远满电", tags: ["drama", "rabbit", "cat"] }
+                ]
+            },
+            {
+                question: "6. 当你需要熬夜赶一份DDL（截止日期）时，你的状态是：",
+                options: [
+                    { text: "边哭边做，觉得自己是世界上最惨的打工人/学生", tags: ["malo", "tired", "sweat"] },
+                    { text: "极致拖延，不到最后十分钟绝不开工，然后一顿操作猛如虎", tags: ["lazy", "dog"] },
+                    { text: "戴上耳机，面无表情地敲键盘，像个没有感情的机器", tags: ["numb", "capybara"] },
+                    { text: "喝下第三杯冰美式，精神亢奋，甚至想顺便把下周的活也干了", tags: ["rabbit", "elegant"] }
+                ]
+            },
+            {
+                question: "7. 如果用一种动物来形容你的工作/学习态度，最贴切的是？",
+                options: [
+                    { text: "拉磨的驴：只要给口草吃（发工资），就能一直转", tags: ["malo", "tired"] },
+                    { text: "水豚：泰山崩于前而面不改色，随缘吧", tags: ["capybara", "zen", "lazy"] },
+                    { text: "尖叫土拨鼠：每天都在崩溃和自愈中反复横跳", tags: ["cat", "sweat"] },
+                    { text: "骄傲的孔雀：哪怕累死，也要保持老娘最美的姿态", tags: ["elegant", "babi", "sassy"] }
+                ]
+            },
+            {
+                question: "8. 面对一堆麻烦事同时找上门，你的减压方式是：",
+                options: [
+                    { text: "点一顿极其罪恶的重口味外卖/奶茶，用热量麻痹自己", tags: ["lazy", "malo"] },
+                    { text: "疯狂买买买，花钱买快乐，哪怕月底吃土", tags: ["babi", "drama"] },
+                    { text: "找个没人的地方发疯大叫，或者看无脑搞笑视频", tags: ["rabbit", "cat"] },
+                    { text: "直接摆烂去睡觉，睡醒了再说，天塌下来当被子盖", tags: ["capybara", "numb"] }
+                ]
+            },
+            {
+                question: "9. 看到朋友圈里有人发了极其矫情做作的文案，你会？",
+                options: [
+                    { text: "当作没看见快速划过，懒得给眼神", tags: ["zen", "capybara", "elegant"] },
+                    { text: "故意点个赞或者发个流汗黄豆，主打一个阴阳怪气", tags: ["troll", "sweat", "dog"] },
+                    { text: "立刻分享给共同好友：“快看快看，他又开始了！”", tags: ["drama", "rabbit"] },
+                    { text: "在心里替别人尴尬的毛病又犯了，替他脚趾抠出三室一厅", tags: ["numb", "smile"] }
+                ]
+            },
+            {
+                question: "10. 如果遇到难缠的客服或者不讲理的杠精，你会怎么处理？",
+                options: [
+                    { text: "懒得掰扯，直接拉黑/退款，多说一个字都觉得浪费生命", tags: ["capybara", "lazy", "elegant"] },
+                    { text: "阴阳怪气地回复：“您说得都对呢~”，把对方气死", tags: ["sassy", "dog", "troll"] },
+                    { text: "战斗力爆表，引经据典写八百字小作文必须吵赢", tags: ["cat", "babi", "angry"] },
+                    { text: "一开始想吵，打了一半字觉得没意思，又默默删掉", tags: ["malo", "sweat"] }
+                ]
+            },
+            {
+                question: "11. 理想中的完美休假状态是：",
+                options: [
+                    { text: "手机静音，躺在床上刷视频刷到天荒地老，谁也别管我", tags: ["lazy", "capybara", "numb"] },
+                    { text: "精心打扮去网红店打卡拍照，发完朋友圈才算休过假", tags: ["babi", "elegant"] },
+                    { text: "去完全没人认识我的城市，像野人一样疯狂撒欢", tags: ["rabbit", "drama"] },
+                    { text: "和三五好友找个安静的地方喝茶聊天，岁月静好", tags: ["zen", "fish"] }
+                ]
+            },
+            {
+                question: "12. 当别人当面夸奖你时，你真实的心理反应是？",
+                options: [
+                    { text: "表面谦虚“没有啦”，心里暗爽“我确实牛逼”", tags: ["smile", "babi"] },
+                    { text: "极度尴尬，浑身不自在，赶紧找个理由转移话题", tags: ["sweat", "numb"] },
+                    { text: "大大方方接下：“谢谢，我也这么觉得”", tags: ["elegant", "sassy"] },
+                    { text: "立刻夸回去，开始一波极限商业互吹", tags: ["troll", "rabbit"] }
+                ]
+            },
+            {
+                question: "13. 和半熟不熟的人同乘一部电梯，为了打破尴尬你会：",
+                options: [
+                    { text: "假装很忙地疯狂滑手机，哪怕只是在划桌面", tags: ["sweat", "malo", "numb"] },
+                    { text: "主动找个无聊的话题（比如天气）强行尬聊", tags: ["smile", "elegant"] },
+                    { text: "根本不觉得尴尬，甚至敢直勾勾盯着电梯门发呆", tags: ["capybara", "zen"] },
+                    { text: "在心里疯狂祈祷电梯快点开，面部表情已经微微扭曲", tags: ["cat", "lazy"] }
+                ]
+            },
+            {
+                question: "14. 你的“情绪稳定程度”处于什么段位？",
+                options: [
+                    { text: "坚如磐石。已经没有什么能伤害我这颗死透了的心", tags: ["capybara", "numb", "fish"] },
+                    { text: "间歇性发疯，持续性后悔，情绪像过山车", tags: ["cat", "rabbit", "drama"] },
+                    { text: "表面稳如老狗，内心实际上已经问候了对方祖宗十八代", tags: ["smile", "malo", "tired"] },
+                    { text: "我只对我看得顺眼的人情绪稳定，其他人死活与我无关", tags: ["sassy", "babi", "elegant"] }
+                ]
+            },
+            {
+                question: "15. 你平时最喜欢用什么类型的头像？",
+                options: [
+                    { text: "各种搞怪、沙雕、高糊发疯表情包（代表我的精神状态）", tags: ["rabbit", "cat", "drama"] },
+                    { text: "岁月静好的风景、可爱小动物、纯色块（与世无争）", tags: ["zen", "capybara", "fish"] },
+                    { text: "极具氛围感的帅哥美女、网图或者绝美自拍（颜值即正义）", tags: ["elegant", "babi", "sassy"] },
+                    { text: "无人在意的角落截图、打工人丧气图、流泪猫猫头（摆烂了）", tags: ["malo", "tired", "sweat"] }
+                ]
+            }
+        ];
+
+        // --- 2. 结果数据 (15个标准结果) ---
+        const rawMemes = [
+            ["打工吗喽", "images/kendiannao.png", "work,malo,tired", "怨气拉满的打工牛马", "看起来唯唯诺诺，实则每天都在心底上演八百回离职大戏。你是天生的“背锅侠”体质，表面回复着“好的收到”，背地里已经把键盘敲出了火星子。是朋友眼中最踏实、但也最容易疲惫的老好人。", "间歇性想辞职，持续性为五斗米折腰。改天请自己喝杯奶茶吧，吗喽的命也是命！"],
+            ["水豚卡皮巴拉", "images/yushao.png", "capybara,zen,numb", "情绪稳定的活化石", "地球爆炸了你都能淡定地翻个身继续睡。你拥有无与伦比的钝感力，对外界的兵荒马乱有一种“关我屁事”的超脱。朋友圈里你是不争不抢的透明人，也是朋友们最爱倾诉的“树洞”。", "太过佛系，有时候会被别人当作没主见。偶尔也稍微展示一下你的獠牙吧！"],
+            ["流汗黄豆", "images/kugua.png", "sweat,kugua,numb", "大写的无语与尴尬", "你的日常精神状态就是“差不多得了”。你总能一眼看穿别人的做作，但又懒得当面戳穿，只能在心里默默流下尴尬的汗水。你是朋友圈里的吐槽役担当，内心戏极其丰富。", "容易在心里把别人判死刑，但现实中又怂得一匹，典型的“嘴强王者”。"],
+            ["敲木鱼", "images/ji.png", "fish,zen,lazy", "自我超度的修行者", "你的人生信条是“莫生气，气出病来无人替”。面对傻逼，你已经学会了物理免疫，遇到奇葩第一反应不是生气，而是双手合十默念阿弥陀佛。你是一个为了保命而选择性眼瞎的智者。", "虽然表面敲木鱼，但木鱼可能都快被你敲碎了。别憋坏了，实在不行就骂出声来。"],
+            ["尖叫扭曲的猫", "images/jiangxiamao.png", "cat,angry,drama", "随时破防的暴躁甜心", "你的情绪极度外放，一点就着，是个不折不扣的“火药桶”。你对这个世界的要求很高，一旦事情不如意就会立刻在精神上发疯。但在朋友眼里，你的真性情反而非常可爱、没有心机。", "情绪来得快去得也快，刚发完脾气下一秒就能拉着别人去吃火锅。就是有点费嗓子。"],
+            ["迷之微笑", "images/nanshen.png", "smile,nanshen", "优雅从容的假面狐狸", "你深谙成年人的社交法则，不管遇到多离谱的事情，都能维持住脸上那一抹神秘的微笑。你绝对不会让别人看穿你的底牌，在朋友眼中你是个神秘、靠谱、甚至有点腹黑的大佬。", "用微笑掩饰一切，但有时候面具戴久了，会忘了怎么真正表达不开心。"],
+            ["阴阳怪气小狗", "images/xiaobaidog.png", "dog,sassy,troll", "互联网顶级阴阳师", "你长着一张人畜无害的脸，却总能用最温柔的语气说出最扎心的话。你不喜欢正面冲突，擅长用表情包和标点符号将对方噎得死死的。你是朋友聚会中的笑点制造机。", "太爱玩梗，有时候会让不熟的人觉得你不好惹或者脾气古怪。"],
+            ["暴走Kitty", "images/hellokitty2.png", "angry,hellokitty2", "披着羊皮的战斗机", "别看你平时打扮得光鲜亮丽、轻声细语，一旦触碰到你的底线，你会立刻变身狂暴战士。你信奉“人不犯我我不犯人”，在朋友圈里是公认的惹不起的狠角色。", "虽然战斗力爆表，但其实内心很渴望被顺毛摸，典型的吃软不吃硬。"],
+            ["躺平咸鱼", "images/man.png", "lazy,man", "极致的拖延症晚期", "能坐着绝不站着，能躺着绝不坐着。你的世界观里没有“内卷”这个词，只要还能呼吸，明天的事就交给明天的自己。你是周围人眼中的松弛感大师，也是DDL面前的绝命毒师。", "总是在深夜因为白天的虚度光阴而懊悔，但第二天醒来依然决然地选择继续躺平。"],
+            ["傲娇大小姐", "images/babi2.png", "babi,elegant,sassy", "高不可攀的完美主义", "你对生活品质有极高的要求，绝不允许自己蓬头垢面地出现在熟人面前。哪怕心里慌得一批，外表也要保持绝对的优雅和傲娇。朋友圈里你是永远的C位，自带闪光灯。", "死鸭子嘴硬，哪怕心里很在乎，嘴上也永远要占上风，容易错失好意。"],
+            ["精神离职人", "images/babi.png", "babi,tired", "灵魂已被抽干的躯壳", "你每天起床的第一件事就是叹气，上班/上学如上坟。你并不愤怒，只是单纯觉得活着好累。你像个游魂一样飘荡在社交网络，偶尔发几句略带黑色幽默的伤痛文学。", "别太丧啦！去吃顿好的，或者买件漂亮衣服，你的灵魂还需要一点世俗的烟火气来滋养。"],
+            ["乐子人青蛙", "images/xieejww.png", "troll,drama,xieejww", "看热闹不嫌事大的吃瓜群众", "哪里有八卦，哪里就有你。你唯恐天下不乱，每天在各大社交平台疯狂吃瓜，且拥有极强的吐槽天赋。你是朋友圈里的情报局局长，只要有你在，绝对不会冷场。", "吃瓜归吃瓜，小心哪天瓜砸到自己头上。适当减少冲浪时间，多看看现实世界吧。"],
+            ["疯批小兔", "images/tuzi.png", "rabbit,drama,hyper", "不可预测的混沌邪恶", "你的大脑结构绝对异于常人，经常会有极其跳脱的脑洞和让人摸不着头脑的操作。你精力旺盛，喜欢挑战一切不确定的事物，是朋友眼中的“开心果”兼“不定时炸弹”。", "思维太跳跃，有时候别人很难跟上你的节奏。偶尔也需要安静下来做个乖乖兔哦。"],
+            ["优雅端水大师", "images/jisaier.png", "elegant,jisaier", "八面玲珑的社交花", "情商极高，极度在意别人的看法，总是能在不同的人群中游刃有余地穿梭。你永远不会让任何一个人冷场，是朋友圈里的中央空调和粘合剂。表面光鲜，其实内心很累。", "端水端久了，手也是会酸的。学会拒绝，试着把那一碗水泼出去，你会发现快乐很多。"],
+            ["岁月静好", "images/hellokitty.png", "zen,hellokitty", "强撑微笑的假笑男孩/女孩", "即使生活已经把你按在地上摩擦，你发出的表情包依然是“好的呢~”、“开心~”。你极力向世界展示你美好的一面，把所有的崩溃都留给深夜的自己，让人心疼的体面人。", "别再装坚强了，偶尔发一次脾气、爆一句粗口，你会发现天塌不下来。"]
+        ];
+
+        const memes = rawMemes.map(m => ({
+            name: m[0],
+            image: m[1],
+            tags: m[2].split(','),
+            highlight: m[3],
+            persona: m[4],
+            flaw: m[5]
+        }));
+
+        // --- 3. 隐藏彩蛋数据 ---
+        const easterEggs = {
+            "238796": {
+                name: "专属彩蛋：Alex",
+                image: "images/caidanalex.png",
+                highlight: "被选召的神秘隐藏款",
+                persona: "当你输入这个专属代码，所有的规则都为你让路。你有着独属于自己的精神世界，不随波逐流，是朋友圈里最特别的存在。",
+                flaw: "太特别了，以至于常常让人觉得你带着一层神秘的面纱。"
+            },
+            "020707": {
+                name: "专属彩蛋：Quinn",
+                image: "images/caidanquinn.png",
+                highlight: "打破次元壁的稀有掉落",
+                persona: "你精准地找到了通往隐藏世界的钥匙。你聪慧、敏感且具有探险精神，平平无奇的日常无法满足你，你生来就是为了寻找彩蛋的玩家。",
+                flaw: "偶尔会因为过于专注寻找细节，而忽略了身边那些触手可及的普通快乐。"
+            },
+            "030501": {
+                name: "专属彩蛋：Yumiko",
+                image: "images/caidianyumiko.png",
+                highlight: "万中无一的灵魂共振",
+                persona: "命中注定的相遇！你温柔且执着，带着一种让人无法拒绝的亲和力。在朋友眼中，你就像这个彩蛋一样，是平淡生活里的一抹惊喜。",
+                flaw: "把太多的温柔给了别人，记得也要把同样的偏爱留给自己哦。"
+            }
+        };
+
+        // --- 应用状态与逻辑 ---
+        
+        const app = document.getElementById('app');
+        let currentStep = 0; 
+        let userAnswers = []; 
+        let finalResult = null; // 用于存储最终展示的结果对象
+
+        function render() {
+            app.innerHTML = '';
+            if (currentStep === 0) {
+                renderStart();
+            } else if (currentStep > 0 && currentStep <= questions.length) {
+                renderQuestion(currentStep - 1);
+            } else if (currentStep === questions.length + 1) {
+                renderUnlock(); 
+            } else {
+                renderResult();
+            }
+        }
+
+        function renderStart() {
+            const html = `
+                <div class="fade-in flex flex-col items-center justify-center h-full pt-12 text-center">
+                    <div class="w-24 h-24 mb-6 rounded-full bg-morandi-card flex items-center justify-center shadow-sm border border-morandi-border text-5xl">
+                        🤡
+                    </div>
+                    <h2 class="text-2xl font-bold text-morandi-text mb-4 tracking-wide">测测你的本命表情包</h2>
+                    <p class="text-morandi-subtext mb-10 px-4 leading-relaxed text-sm">
+                        群聊潜水、周末被鸽、口头禅...<br>你伪装得再好，<br>你最常用的表情包也会出卖你的灵魂。<br>15道题，精准狙击你的当代精神状态。
+                    </p>
+                    <button onclick="nextStep()" class="bg-morandi-primary hover:bg-morandi-primaryDark text-morandi-text font-bold py-3.5 px-12 rounded-full shadow-sm transition-all active:scale-95">
+                        开始直面灵魂
+                    </button>
+                    <p class="mt-6 text-xs text-morandi-subtext/70">内置50+经典发疯/佛系图库匹配</p>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        function renderQuestion(index) {
+            const q = questions[index];
+            let optionsHtml = '';
+            q.options.forEach((opt) => {
+                optionsHtml += `
+                    <button onclick="selectOption('${opt.tags.join(',')}')" 
+                        class="option-btn w-full text-left p-5 mb-4 rounded-2xl border-2 border-morandi-border bg-white text-morandi-text hover:border-morandi-primary/60 transition-all shadow-sm">
+                        ${opt.text}
+                    </button>
+                `;
+            });
+
+            const html = `
+                <div class="fade-in flex flex-col h-full mt-4">
+                    <div class="flex justify-between items-center mb-6 text-sm text-morandi-subtext font-medium">
+                        <span class="tracking-wide font-bold">Q${index + 1}</span>
+                        <span>${index + 1} / ${questions.length}</span>
+                    </div>
+                    
+                    <div class="w-full bg-morandi-border/80 h-1.5 rounded-full mb-8 overflow-hidden">
+                        <div class="bg-morandi-primaryDark h-1.5 rounded-full transition-all duration-300" style="width: ${((index + 1) / questions.length) * 100}%"></div>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-morandi-text mb-8 leading-snug">${q.question}</h3>
+                    
+                    <div class="flex-1 flex flex-col">
+                        ${optionsHtml}
+                        <button onclick="prevStep()" class="mt-auto mb-6 w-full bg-transparent border-2 border-morandi-border text-morandi-subtext hover:bg-white hover:text-morandi-text font-medium py-3.5 rounded-2xl transition-all active:scale-95 shadow-sm">
+                            ${index === 0 ? '返回首页' : '返回上一题'}
+                        </button>
+                    </div>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        window.selectOption = function(tagsStr) {
+            if(tagsStr) {
+                userAnswers[currentStep - 1] = tagsStr.split(',');
+            }
+            setTimeout(() => {
+                nextStep();
+            }, 150); 
+        }
+
+        window.prevStep = function() {
+            if (currentStep > 0) {
+                currentStep--;
+                render();
+            }
+        }
+
+        function nextStep() {
+            currentStep++;
+            render();
+        }
+
+        function reset() {
+            currentStep = 0;
+            userAnswers = [];
+            finalResult = null;
+            render();
+        }
+
+        function calculateStandardResult() {
+            let tagCounts = {};
+            const allTags = userAnswers.flat().filter(Boolean);
+            allTags.forEach(tag => {
+                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+            });
+
+            let bestMeme = null;
+            let maxScore = -1;
+            
+            memes.forEach(meme => {
+                let score = 0;
+                meme.tags.forEach(tag => {
+                    if (tagCounts[tag]) score += tagCounts[tag];
+                });
+                
+                score += Math.random() * 0.1; // 随机微调防平局
+
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestMeme = meme;
+                }
+            });
+
+            return bestMeme || memes[0];
+        }
+
+        function renderUnlock() {
+            const html = `
+                <div class="fade-in flex flex-col items-center justify-center h-full pt-10 text-center">
+                    <div class="w-20 h-20 mb-6 rounded-full bg-white border-4 border-morandi-border flex items-center justify-center shadow-sm text-3xl">
+                        🔐
+                    </div>
+                    <h2 class="text-xl font-bold text-morandi-text mb-3">精神状态已提取完成</h2>
+                    <p class="text-morandi-subtext mb-8 px-6 leading-relaxed text-sm">
+                        请在下方输入解锁码，立即获取你的本命表情包与专属毒舌解析。
+                    </p>
+                    
+                    <div class="w-full max-w-xs mb-6 relative">
+                        <input type="text" id="unlockCode" maxlength="6" placeholder="输入6位解锁码" 
+                            class="w-full text-center px-4 py-3.5 rounded-2xl border-2 border-morandi-border focus:border-morandi-primaryDark focus:outline-none bg-white text-morandi-text font-bold tracking-[0.3em] shadow-sm transition-all">
+                        <p id="errorMsg" class="text-morandi-error text-xs mt-3 hidden fade-in font-bold">解锁码似乎不对哦，再试一次吧</p>
+                    </div>
+
+                    <button onclick="verifyCode()" class="w-full max-w-xs bg-morandi-primary hover:bg-morandi-primaryDark text-morandi-text font-bold py-3.5 rounded-2xl shadow-sm transition-all active:scale-95 mb-4">
+                        确认解锁
+                    </button>
+                    <button onclick="prevStep()" class="w-full max-w-xs bg-transparent text-morandi-subtext hover:text-morandi-text text-sm py-2 transition-all">
+                        返回上一题修改答案
+                    </button>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        window.verifyCode = function() {
+            const code = document.getElementById('unlockCode').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            
+            // 全局标准密码读取 (config.js 中定义的 GLOBAL_PASSWORD)
+            const standardCode = typeof GLOBAL_PASSWORD !== 'undefined' ? GLOBAL_PASSWORD : '888888';
+            
+            // 检查隐藏彩蛋
+            if (easterEggs[code]) {
+                finalResult = easterEggs[code];
+                nextStep();
+            } 
+            // 检查标准密码
+            else if (code === standardCode) {
+                finalResult = calculateStandardResult();
+                nextStep();
+            } 
+            // 密码错误
+            else {
+                errorMsg.classList.remove('hidden'); 
+            }
+        }
+
+        function renderResult() {
+            const r = finalResult;
+            
+            const html = `
+                <div class="fade-in flex flex-col items-center pt-2 pb-6">
+                    <p class="text-xs text-morandi-subtext mb-2 font-bold tracking-widest">YOUR DESTINED MEME</p>
+                    <h2 class="text-2xl font-bold text-morandi-text mb-6">你的本命表情包是</h2>
+                    
+                    <!-- 图片展示区 -->
+                    <div class="w-full max-w-[280px] bg-white p-3 rounded-3xl shadow-sm border-2 border-morandi-border mb-6">
+                        <img src="${r.image}" alt="${r.name}" class="w-full h-auto rounded-2xl object-cover" onerror="this.src='https://placehold.co/400x400/FDFBF7/4A4A4A?text=表情包走丢了'">
+                    </div>
+
+                    <h3 class="text-xl font-black text-morandi-text mb-1 tracking-wider">${r.name}</h3>
+                    <p class="text-xs px-3 py-1 bg-morandi-tag text-morandi-tagText rounded-full mb-8 font-bold">
+                        ${r.highlight}
+                    </p>
+
+                    <!-- 文案解析区 -->
+                    <div class="w-full bg-white rounded-3xl p-6 shadow-sm border-2 border-morandi-border mb-8 relative overflow-hidden">
+                        
+                        <div class="mb-5 relative z-10">
+                            <h4 class="text-sm font-bold text-morandi-text mb-2 flex items-center">
+                                <span class="mr-2">🎭</span> 朋友圈真实人设
+                            </h4>
+                            <p class="text-sm text-morandi-text/90 leading-relaxed bg-morandi-bg p-3 rounded-xl">
+                                ${r.persona}
+                            </p>
+                        </div>
+                        
+                        <div class="relative z-10">
+                            <h4 class="text-sm font-bold text-morandi-text mb-2 flex items-center">
+                                <span class="mr-2">🗡️</span> 社交扎心吐槽
+                            </h4>
+                            <p class="text-sm text-morandi-text/90 leading-relaxed bg-morandi-bg p-3 rounded-xl">
+                                ${r.flaw}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col w-full gap-3">
+                        <button onclick="alert('截图功能受浏览器限制，请直接长按屏幕或使用手机自带截图功能分享哦～')" class="w-full bg-morandi-primary hover:bg-morandi-primaryDark text-morandi-text font-bold py-3.5 rounded-2xl shadow-sm transition-all active:scale-95">
+                            截图保存，发朋友圈
+                        </button>
+                        <button onclick="reset()" class="w-full bg-white border-2 border-morandi-border text-morandi-subtext hover:text-morandi-text font-bold py-3.5 rounded-2xl shadow-sm transition-all active:scale-95">
+                            重新测试
+                        </button>
+                    </div>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        window.onload = () => {
+            render();
+        };
+    </script>
+</body>
+</html>
