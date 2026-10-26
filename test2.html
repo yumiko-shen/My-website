@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>测测你的本命定居城市 | 你最适合在哪长期定居？</title>
+    <script src="../config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -474,8 +475,9 @@
             const code = document.getElementById('unlockCode').value.trim();
             const errorMsg = document.getElementById('errorMsg');
             
-            // 此处硬编码了密码为 888888，你可以随时更改
-            if (code === '888888') {
+           // 自动读取配置文件的密码，如果读取失败则默认使用 888888
+        const correctCode = typeof GLOBAL_PASSWORD !== 'undefined' ? GLOBAL_PASSWORD : '888888';
+        if (code === correctCode) {
                 errorMsg.classList.add('hidden');
                 nextStep(); // 密码正确，放行进入结果页
             } else {
