@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>测测你的本命植物 | 哪株植物是你的灵魂伴侣？</title>
+    <script src="../config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        morandi: {
+                            bg: '#F9F8F4',      // 燕麦色背景
+                            card: '#FFFFFF',    // 卡片白
+                            text: '#4A5345',    // 深灰绿色文字
+                            subtext: '#8E9689', // 浅灰绿次要文字
+                            border: '#E3E5D8',  // 柔和边框
+                            primary: '#8F9E8B', // 豆沙绿主色调
+                            hover: '#7B8B77',   // 主色调悬浮
+                            tag: '#D2C4B3',     // 浅木色标签
+                            tagText: '#5A5144', // 标签文字
+                            error: '#D4A398'    // 莫兰迪红错误提示
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"PingFang SC"', '"Helvetica Neue"', 'STHeiti', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F9F8F4;
+            color: #4A5345;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-morandi-primary selection:text-white">
+
+    <!-- 顶部固定标题 -->
+    <header class="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-morandi-border z-50 transition-all">
+        <div class="max-w-md mx-auto px-4 h-12 flex items-center justify-center">
+            <h1 class="text-sm font-medium text-morandi-text truncate tracking-wide">
+                测测你的本命植物 | 哪株植物是你的灵魂伴侣？
+            </h1>
+        </div>
+    </header>
+
+    <!-- 主体内容区 -->
+    <main id="app" class="flex-1 w-full max-w-md mx-auto pt-16 pb-8 px-4 flex flex-col relative">
+        <!-- 内容由JS动态渲染 -->
+    </main>
+
+    <script>
+        // --- 1. 题目数据 (15题) ---
+        const questions = [
+            {
+                question: "1. 你每天能抽出多少时间来照顾植物？",
+                options: [
+                    { text: "我是大忙人/懒人，十天半个月才想起来浇次水", tags: ["lazy", "dry", "succulent"] },
+                    { text: "每天下班或周末能抽出十分钟看看它们", tags: ["medium_care", "indoor"] },
+                    { text: "我超有耐心，每天早晚喷水修剪观察都不在话下", tags: ["hardworking", "humid", "flower"] },
+                    { text: "看心情，有时极度狂热，有时彻底遗忘", tags: ["tough", "resilient"] }
+                ]
+            },
+            {
+                question: "2. 你平时房间的日常状态通常是？",
+                options: [
+                    { text: "井井有条，一尘不染，定期大扫除", tags: ["clean", "elegant", "minimal"] },
+                    { text: "稍微有点乱，但在自己能找到的掌控之中", tags: ["casual", "leafy"] },
+                    { text: "东西很多，喜欢被各种小物件包围的温馨感", tags: ["warm", "cute", "flower"] },
+                    { text: "极简风，台面空无一物，讨厌杂乱", tags: ["minimal", "zen", "sculptural"] }
+                ]
+            },
+            {
+                question: "3. 你计划把植物主要放在哪里的环境？",
+                options: [
+                    { text: "阳光爆棚的南向阳台或大窗台", tags: ["sun_loving"] },
+                    { text: "明亮但没有直射光的客厅或书桌", tags: ["bright_indirect", "shade_tolerant"] },
+                    { text: "采光一般，有时需要开灯的角落或浴室", tags: ["low_light", "shade_tolerant"] },
+                    { text: "室外庭院或露天阳台", tags: ["outdoor", "sun_loving"] }
+                ]
+            },
+            {
+                question: "4. 你所在城市的气候整体偏向？",
+                options: [
+                    { text: "四季分明，冬天比较冷", tags: ["cold_tolerant"] },
+                    { text: "常年温暖湿润，偶尔有梅雨/回南天", tags: ["humid", "heat_tolerant"] },
+                    { text: "比较干燥，风大", tags: ["dry", "tough"] },
+                    { text: "我是室内空调/暖气党，外面什么天气无所谓", tags: ["indoor_climate"] }
+                ]
+            },
+            {
+                question: "5. 你的性格底色更偏向于？",
+                options: [
+                    { text: "外向开朗，喜欢热闹和社交", tags: ["colorful", "flower"] },
+                    { text: "内向安静，享受独处，自带结界", tags: ["zen", "elegant"] },
+                    { text: "情绪稳定，包容心强，妥妥的倾听者", tags: ["large_leaf", "resilient"] },
+                    { text: "特立独行，古灵精怪，脑洞很大", tags: ["weird", "rare"] }
+                ]
+            },
+            {
+                question: "6. 在外观上，你最容易被哪种类型的植物吸引？",
+                options: [
+                    { text: "叶片巨大、油绿发亮，有热带雨林感", tags: ["tropical", "large_leaf"] },
+                    { text: "能开出漂亮的花朵，浪漫有色彩", tags: ["flower", "colorful"] },
+                    { text: "胖乎乎、肉嘟嘟，小巧可爱", tags: ["succulent", "cute"] },
+                    { text: "枝干飘逸，自带高级的线条感和禅意", tags: ["zen", "elegant"] }
+                ]
+            },
+            {
+                question: "7. 你的家里是否有调皮的宠物或小宝宝？",
+                options: [
+                    { text: "有猫猫/狗狗/小孩，必须绝对无毒安全", tags: ["pet_safe"] },
+                    { text: "有，但我可以把它挂起来或者放在碰不到的地方", tags: ["hanging", "toxic_ok"] },
+                    { text: "没有，我是自由独居青年/伴侣共住", tags: ["toxic_ok", "any"] },
+                    { text: "不光没有，我还想用植物来“防贼”或做屏障", tags: ["thorny"] }
+                ]
+            },
+            {
+                question: "8. 对于植物的生长速度，你的期待是？",
+                options: [
+                    { text: "最好长得飞快，每天都能看到新变化，有成就感", tags: ["fast_growing"] },
+                    { text: "慢慢长就好，顺其自然，陪伴才是长情", tags: ["slow_growing"] },
+                    { text: "最好买来啥样就一直啥样，不用频繁换盆", tags: ["slow_growing", "sculptural"] },
+                    { text: "不仅要长，最好还能爬藤或者长满一面墙", tags: ["climbing"] }
+                ]
+            },
+            {
+                question: "9. 周末休息时，你最倾向于做什么？",
+                options: [
+                    { text: "去户外徒步、露营、逛公园吸氧", tags: ["outdoor", "tropical"] },
+                    { text: "宅在家里做饭、看剧、收拾屋子", tags: ["indoor", "warm"] },
+                    { text: "和朋友去打卡网红咖啡馆或看展", tags: ["trendy", "elegant"] },
+                    { text: "做手工、画画、玩游戏等沉浸式爱好", tags: ["weird", "succulent"] }
+                ]
+            },
+            {
+                question: "10. 如果你的植物生病或长虫了，你的第一反应是？",
+                options: [
+                    { text: "立刻查资料、买药、隔离，悉心救治", tags: ["hardworking", "sensitive"] },
+                    { text: "直接扔掉，不想被虫子吓到，旧的不去新的不来", tags: ["bug_free", "easy"] },
+                    { text: "随缘吧，给它浇点水，能不能活看它的造化", tags: ["tough"] },
+                    { text: "不敢靠近，花钱请有经验的朋友或师傅来搞定", tags: ["easy"] }
+                ]
+            },
+            {
+                question: "11. 你在购买植物时的消费观念是？",
+                options: [
+                    { text: "只要好看、特别，价格贵一点也愿意买单", tags: ["expensive", "rare"] },
+                    { text: "追求高性价比，喜欢从小苗带大或者买平价爆款", tags: ["cheap", "easy"] },
+                    { text: "去花卉市场看缘分，几十块以内搞定", tags: ["cheap"] },
+                    { text: "喜欢买便宜好养的，死了也不心疼", tags: ["cheap", "tough"] }
+                ]
+            },
+            {
+                question: "12. 你希望植物能为你提供什么附加价值吗？",
+                options: [
+                    { text: "超强的空气净化能力，吸甲醛吸废气", tags: ["air_purify"] },
+                    { text: "好闻的香气，能让人放松或驱蚊", tags: ["fragrant"] },
+                    { text: "可以剪下来泡茶、做饭或者当调料", tags: ["edible"] },
+                    { text: "纯粹的视觉享受和情绪疗愈，好看就行", tags: ["visual"] }
+                ]
+            },
+            {
+                question: "13. 对于“配土、施肥、换盆”这些硬核操作，你的态度是？",
+                options: [
+                    { text: "超喜欢折腾！我已经是个成熟的“植物魔法师”了", tags: ["hardworking", "pro"] },
+                    { text: "买现成的营养土，偶尔想起来倒点营养液", tags: ["medium_care"] },
+                    { text: "完全不懂，最好买来原盆原土就能一直养", tags: ["easy", "lazy"] },
+                    { text: "最好连土都不要，水培或者直接放着就能活", tags: ["water_culture", "no_soil"] }
+                ]
+            },
+            {
+                question: "14. 如果要装修新房子，你更向往哪种风格？",
+                options: [
+                    { text: "复古法式或原木风，温馨且有质感", tags: ["elegant", "flower"] },
+                    { text: "极简侘寂风或工业风，清冷克制", tags: ["zen", "minimal", "sculptural"] },
+                    { text: "波西米亚或森系风，充满绿意和野性", tags: ["tropical", "leafy"] },
+                    { text: "活泼色彩风，像马卡龙一样充满童趣", tags: ["colorful", "cute"] }
+                ]
+            },
+            {
+                question: "15. 如果人生有一段长假，你最想去哪里？",
+                options: [
+                    { text: "去深山原始森林里大口吸氧", tags: ["tropical", "leafy"] },
+                    { text: "去热带海岛躺在沙滩上晒太阳", tags: ["sun_loving", "warm"] },
+                    { text: "去江南古镇或者京都喝茶发呆", tags: ["zen", "elegant"] },
+                    { text: "哪里都不去，在家里彻底躺平点外卖", tags: ["indoor", "lazy", "easy"] }
+                ]
+            }
+        ];
+
+        // --- 2. 植物数据 (50个：25观叶 + 25开花/多肉/特殊) ---
+        const rawPlants = [
+            // 观叶/室内绿植 (25种)
+            ["龟背竹", "观叶绿植", "tropical,large_leaf,easy,lazy,shade_tolerant,air_purify", "自带热带雨林的松弛感，叶片开裂有着几何般的美学，极具北欧风情。", "不内耗、性格随性包容、喜欢给生活留白的人。", "长得太快容易变成“庞然大物”，需要及时修剪或绑扎。"],
+            ["马醉木", "鲜切观叶", "elegant,indoor,water_culture,zen,minimal", "鲜切枝条界的天花板，枝干虬曲有致，叶片轻盈飘逸，自带清冷孤高的气质。", "极简主义者、喜欢清冷高级感、追求生活仪式感的人。", "本质是鲜切枝，寿命一般在1-3个月；而且是个十足的“抽水机”，需要勤换水。"],
+            ["琴叶榕", "观叶绿植", "large_leaf,sun_loving,trendy,visual,tree", "有着小提琴般巨大而油亮的叶片，树形挺拔，是网红家居杂志的常客。", "注重生活品质、审美在线、内心有明确主见的人。", "有点大小姐脾气，对光照和通风要求高，一不高兴就掉叶子给你看。"],
+            ["散尾葵", "观叶绿植", "tropical,leafy,humid,air_purify,pet_safe", "羽状叶片自带轻盈度假风，是天然的“加湿器”和空气净化小能手。", "向往自由、性格温柔体贴、喜欢大自然的人。", "对空气湿度要求高，北方冬天暖气房里容易干尖，需要经常喷水。"],
+            ["橡皮树", "观叶绿植", "tough,dry,lazy,low_light,sculptural,dark", "叶片厚实如皮革，颜色深邃高级（黑金刚），给人极其稳重安定的感觉。", "情绪稳定、低调内敛、不喜欢频繁社交的“社恐”星人。", "生长速度相对较慢，由于叶片容易积灰，需要偶尔帮它擦擦脸。"],
+            ["虎皮兰", "观叶绿植", "lazy,dry,tough,air_purify,easy", "线条笔挺锐利，带状斑纹极具现代感，号称“死不了”的植物界小强。", "工作繁忙的打工人、追求高效极简、想养植物但总是忘浇水的人。", "浇水太勤快反而容易烂根，“溺爱”是它最大的杀手。"],
+            ["绿萝", "观叶绿植", "easy,lazy,hanging,water_culture,air_purify", "植物界的“傻白甜”，永远生机勃勃，遇水即活，有着极强的生命力。", "随遇而安、随和好相处、充满生命力的人。", "长得太野容易显得杂乱，如果缺乏光照叶片会失去光泽。"],
+            ["天堂鸟 (鹤望兰)", "观叶绿植", "large_leaf,sun_loving,tropical,expensive", "巨大的蕉叶带来强烈的热带风情，气场全开，放在客厅立刻提升空间格调。", "性格大气豪爽、有野心、向往热带阳光的人。", "室内养护几乎不可能开花（除非光照极强），叶片容易边缘开裂。"],
+            ["金钱树", "观叶绿植", "dry,lazy,easy,tough,pet_safe", "羽状复叶宛如一串串铜钱，常年翠绿，寓意美好且极其耐旱。", "务实派、踏实肯干、希望事业财运双丰收的人。", "极度怕涝，几个月不浇水可能没事，但连浇几天肯定烂根。"],
+            ["发财树", "观叶绿植", "dry,sun_loving,tree,visual", "枝干粗壮，树冠茂密，有着极好的寓意，是乔迁开业的必备绿植。", "有事业心、渴望财富自由、性格稳重的人。", "根系极其弱小，属于“大头娃娃”，绝不能频繁浇水。"],
+            ["孔雀竹芋", "观叶绿植", "humid,shade_tolerant,pattern,colorful,pet_safe", "叶片上有如同孔雀羽毛般精致华丽的斑纹，夜晚还会神奇地将叶片立起来“睡眠”。", "心思细腻、有艺术细胞、作息规律的人。", "植物界的“林黛玉”，对湿度要求极高，缺水或暴晒立刻焦边给你看。"],
+            ["网纹草", "观叶绿植", "humid,small,colorful,cute", "叶片娇小但布满清晰的彩色网纹，非常适合放在办公桌上做微型盆栽。", "注重细节、喜欢微观世界、心思敏感的人。", "戏精本精！缺水半天就全部倒伏“装死”，浇完水两小时又奇迹般复活。"],
+            ["春羽", "观叶绿植", "tropical,large_leaf,easy,leafy", "叶片像巨大的羽毛一样深裂，造型张狂且充满野性，越老越有味道。", "不拘小节、热爱自由、性格大开大合的人。", "非常占地方，生长空间小了会显得憋屈，根系极其霸道。"],
+            ["白鹤芋 (一帆风顺)", "观叶绿植", "shade_tolerant,flower,humid,air_purify", "既能赏叶又能看花，白色的佛焰苞像扬起的风帆，优雅纯洁且极度耐阴。", "性格温和、向往平静生活、懂得示弱的人。", "缺水时整个植株会垂头丧气，是在提醒你“该浇水啦”。"],
+            ["常春藤", "观叶绿植", "climbing,hanging,cool,air_purify", "叶片呈优美的星形，枝条柔软下垂，是极好的空间装饰和空气净化器。", "浪漫主义者、喜欢复古风情、性格有韧性的人。", "非常怕闷热，夏天不通风的话容易生红蜘蛛，是个度夏困难户。"],
+            ["铁线蕨", "观叶绿植", "humid,shade_tolerant,elegant,pet_safe", "黑色的叶柄纤细如铁丝，绿色的复叶轻盈如云雾，自带仙气飘飘的东方韵味。", "温柔敏感、喜欢安静、有古典审美的人。", "极度娇气！一天不喷水或稍微吹点干风，立刻干枯给你看，是“加湿器依赖症”患者。"],
+            ["尤加利", "观叶绿植", "fragrant,sun_loving,dry,cool", "银灰色的圆叶自带高级的高级灰滤镜，散发着独特的清冷木质香气。", "清冷疏离、喜欢木质调香水、有独立思考能力的人。", "作为盆栽非常难养，对光照和通风要求极高，建议直接买鲜切枝。"],
+            ["千年木 (马尾铁)", "观叶绿植", "colorful,tree,easy,dry,zen", "剑形的叶片带有红色或紫色的边缘，树干挺拔笔直，自带冷峻硬朗的雕塑感。", "外冷内热、有个性、不随波逐流的人。", "长得比较慢，光照不足的话叶片的红色边缘会褪去变成纯绿。"],
+            ["文竹", "观叶绿植", "elegant,zen,humid,small", "叶片纤细如羽绒，层层叠叠，姿态文雅飘逸，自带书卷气和东方禅意。", "喜欢读书、性格儒雅内敛、追求精神世界的人。", "不能暴晒也不能干旱，非常怕烟尘，如果在旁边抽烟它会黄叶抗议。"],
+            ["空气凤梨", "特殊绿植", "no_soil,lazy,easy,weird", "地球上唯一完全生于空气中的植物！不需要泥土，甚至不需要花盆，随便往哪一搁就能活。", "脑洞大开、极简主义到极致、讨厌泥土和虫子的人。", "虽然不需要土，但还是需要定期喷水或泡澡的，完全不管它也会变成干草。"],
+            ["鸭脚木", "观叶绿植", "easy,air_purify,tree,tough", "叶片像小鸭子的脚丫，生命力极其旺盛，是吸收二手烟和废气的顶尖高手。", "随和宽容、照顾家庭、默默付出的人。", "长势太猛容易张牙舞爪，需要舍得下手修剪才能保持好看的树形。"],
+            ["吊兰", "观叶绿植", "hanging,easy,lazy,air_purify", "叶片修长，能抽生出长长的匍匐茎，挂在空中随风摇曳，清新淡雅。", "平易近人、适应力极强、永远保持乐观的人。", "太好养了以至于烂大街，如果缺乏修剪容易显得有些杂乱。"],
+            ["宝莲灯", "观叶/开花", "expensive,flower,large_leaf,humid", "植物界的“爱马仕”，巨大的粉色花序垂吊下来宛如宫灯，叶片宽大厚实，极尽奢华气派。", "追求极致生活品质、审美高级、愿意为美买单的人。", "价格不菲，而且对湿度和温度要求苛刻，一不小心就“香消玉殒”。"],
+            ["蔓绿绒 (大仙女等)", "观叶绿植", "tropical,large_leaf,humid,easy", "有着各种奇特叶形的网红植物家族，叶脉清晰，极具天鹅绒般的质感和异域风情。", "充满好奇心、走在潮流前线、喜欢独特事物的人。", "有些品种非常占空间，且汁液轻微有毒，需要避免宠物啃咬。"],
+            ["彩叶芋", "观叶绿植", "colorful,humid,shade_tolerant", "拥有近乎半透明的叶片和令人惊叹的红、粉、白绚丽色彩，像大自然的调色盘。", "性格明媚、内心色彩丰富、生活充满激情的人。", "它是“夏日限定”，冬天温度一低就会枯萎休眠（只留块根），需要等待来年春天苏醒。"],
+
+            // 多肉/开花/特殊植物 (25种)
+            ["铃兰", "开花植物", "flower,elegant,fragrant,cool", "洁白如玉的小钟形花朵，自带空灵仙气和极高级的香气，是法式浪漫的代名词。", "外表高冷内心温柔、追求纯粹、自带清冷感的人。", "美丽却有剧毒！绝不能误食。且非常怕热，度夏是个大考验。"],
+            ["蓝雪花", "开花植物", "flower,sun_loving,fast_growing,tough", "夏天开出冰蓝色的花球，极度耐热耐晒，是能开成一面花墙的“开花机器”。", "性格阳光开朗、充满活力、永远不知疲倦的人。", "每天都需要喝大量的水，一天不浇水花朵就会萎蔫，是个实打实的“水牛”。"],
+            ["生石花 (屁股花)", "多肉植物", "succulent,weird,cute,dry", "长得像色彩斑斓的小石头（或者小屁股），极其呆萌，在干旱中孕育生命的奇迹。", "脑洞大开、喜欢奇奇怪怪小玩意、极度宅的人。", "浇水三年功，烂掉一分钟！控制不住手想给它浇水的人千万别养。"],
+            ["玉露", "多肉植物", "succulent,shade_tolerant,visual,small", "叶片顶部呈透明或半透明状，宛如凝固的露珠，晶莹剔透，是多肉界的小仙女。", "心思澄明、喜欢宁静、温柔且精致的人。", "怕暴晒，光照太强会变成灰褐色，失去晶莹感；太暗又会徒长拔高。"],
+            ["黑法师", "多肉植物", "succulent,dark,cool,tree", "多肉里少有的暗黑系，紫黑色的叶盘像神秘的玫瑰，自带一种霸气和哥特风。", "不走寻常路、外冷内热、有独特审美的人。", "夏天会深度休眠，叶片掉落收拢，看起来像死了一样，其实是在自我保护。"],
+            ["月季", "开花植物", "flower,sun_loving,colorful,hardworking", "花中皇后，品种繁多色彩绚丽，只要阳光和肥料给够，可以回报给你满园春色。", "充满爱心、勤劳不怕麻烦、对生活有热烈期盼的人。", "植物界的“药罐子”！红蜘蛛、白粉病、蚜虫轮番上阵，需要定期打药。"],
+            ["绣球", "开花植物", "flower,humid,shade_tolerant,colorful", "花球巨大饱满，颜色能随土壤酸碱度在蓝粉之间神奇变化，是初夏的梦幻主角。", "情绪丰富、懂得顺应环境变化、充满浪漫细胞的人。", "是个超级“抽水机”，夏天稍不注意叶片就会像纸一样软趴趴。"],
+            ["茉莉", "开花植物", "flower,fragrant,sun_loving,warm", "花朵洁白，香气清雅而不腻，是刻在中国人骨子里的夏天记忆。", "性格纯洁无瑕、怀旧、内心有力量的人。", "“晒不死的茉莉”，一定要放在家里光照最强的地方，不见太阳绝不开花。"],
+            ["三角梅", "开花植物", "flower,sun_loving,dry,climbing", "花量极大，色彩极其绚丽，生命力极其顽强，南方街头的花瀑布全靠它。", "热情奔放、生命力顽强、敢爱敢恨的人。", "有些品种带有尖刺；想让它开花，有时候得下狠心“控水”饿着它。"],
+            ["蝴蝶兰", "开花植物", "flower,expensive,indoor_climate,elegant", "花朵如翩翩起舞的蝴蝶，色彩高贵，花期极长，是过年过节的高级点缀。", "气质高雅、成熟稳重、生活富足从容的人。", "根系需要极好的透气性，千万不能用普通泥土种，只能用水苔或树皮。"],
+            ["仙客来", "开花植物", "flower,cold_tolerant,visual,indoor", "在万物萧条的冬天盛开，花朵像兔子的耳朵一样灵动向上，色彩鲜艳。", "在逆境中依然能保持微笑、带给周围人温暖的人。", "球根植物非常怕烂根，浇水千万不能浇到叶芯和花蕾上。"],
+            ["长寿花", "多肉/开花", "succulent,flower,easy,dry", "多肉界的开花模范，花期长达几个月，色彩丰富，好养到几乎不需要操心。", "性格随和、知足常乐、不争不抢的人。", "夏天怕热，需要遮阴通风；虽然好养，但想要年年爆花还是需要修剪残花的。"],
+            ["薄荷", "食用/芳香", "fragrant,edible,sun_loving,water_culture", "揉搓叶片会散发清凉的香气，可以泡水做mojito，生命力极其旺盛。", "清爽干练、实用主义者、喜欢做饭调饮的人。", "生长速度极其恐怖，如果种在院子里会变成“恶性杂草”吞噬一切，只能盆栽！"],
+            ["迷迭香", "食用/芳香", "fragrant,edible,sun_loving,dry", "自带独特的高级木质香料味，牛排的最佳搭档，手掌拂过余香绕梁。", "热爱美食、性格坚定有毅力、有品味的人。", "需要极好的通风和充足的阳光，室内闷养极易发黑枯死。"],
+            ["捕蝇草", "特殊植物", "weird,fun,sun_loving,wet", "长着像贝壳一样带刺的夹子，真的会迅速闭合吃掉虫子！植物界的顶级捕食者。", "童心未泯、好奇心旺盛、喜欢观察自然的人。", "不能施肥！不能用自来水浇（必须用纯净水）！夹子闭合次数有限，别老拿手去逗它。"],
+            ["猪笼草", "特殊植物", "weird,hanging,humid,fun", "悬挂着一个个奇特的小笼子，里面装满消化液，专治各种不服的小飞虫。", "思路清奇、看似随和实则有心机（褒义）、实用主义者。", "对空气湿度要求极高，如果太干燥，它就会拒绝结出小笼子。"],
+            ["含羞草", "特殊植物", "fun,sun_loving,weird,easy", "轻轻一碰就会害羞地收拢叶片，是植物界最会社交互动的小可爱。", "敏感害羞、内心柔软、需要被温柔对待的人。", "其实它的刺很扎人，而且在户外极其容易变成泛滥的野草。"],
+            ["仙人掌", "多肉植物", "succulent,dry,sun_loving,tough,lazy", "极简到了极致，外表浑身是刺，内心却储满水分，在极度干旱中也能存活。", "外表坚强防备心重、内心柔软、不需要过度干涉的人。", "千万别手贱去摸！有些微小的软刺扎进手里会让你怀疑人生，且几乎不需要浇水。"],
+            ["昙花", "开花植物", "flower,rare,fragrant,night", "只在深夜短暂绽放几小时，花朵大而洁白，香气醉人，是传说中的“月下美人”。", "追求精神极致、不在乎外界眼光、有神秘色彩的人。", "为了看它开花需要熬夜蹲守，平时不开花的时候叶片像海带一样，稍微有点丑。"],
+            ["风信子", "球根植物", "flower,fragrant,water_culture,cold_tolerant", "一个小洋葱似的种球，能开出极其浓郁香气的花柱，水培就能轻松开花。", "充满希望、喜欢简单明了事物、爆发力强的人。", "香味过于浓郁，放在密闭卧室容易头晕；种球含有毒性，接触后需要洗手。"],
+            ["郁金香", "球根植物", "flower,elegant,cold_tolerant,visual", "花杯状，线条流畅，色彩浓郁，是春天最高级优雅的使者。", "追求浪漫、气质出众、对美有极高要求的人。", "大部分地区只能作为“一年生”植物，开完花后种球很难复花，基本看一季就扔。"],
+            ["朱顶红", "球根植物", "flower,large_leaf,expensive,visual", "能开出巨大而惊艳的百合状花朵，被誉为球根界的“劳斯莱斯”。", "气场强大、喜欢大场面、华丽耀眼的人。", "进口种球价格较贵，叶片比较长容易倒伏，开花极其惊艳但花期相对较短。"],
+            ["姬秋丽", "多肉植物", "succulent,cute,pink,easy", "多肉里的爆盆神器，阳光充足时会呈现梦幻的粉色，叶片极易掉落繁殖。", "心思细腻、喜欢粉色少女心、有耐心的人。", "叶片极其脆弱，稍微一碰就掉一地，不过掉下来的叶片全都能长成新生命。"],
+            ["熊童子", "多肉植物", "succulent,cute,sun_loving,fun", "叶片像毛茸茸的小熊爪子，尖端还会涂上红色的“指甲油”，可爱度爆表。", "超级颜控、充满保护欲、喜欢毛绒绒质感的人。", "夏天是它的鬼门关，极度怕闷热，一言不合就全部掉光叶子变成光杆司令，并且带有轻微的特殊臭味。"],
+            ["栀子花", "开花植物", "flower,fragrant,humid,hardworking", "洁白无瑕，香气浓郁但不刺鼻，充满校园时代的清新回忆。", "念旧、内心纯洁、愿意付出精力照顾他人的人。", "出了名的“黄叶怪”，对水土的酸碱度要求高，北方水质偏碱养它很容易黄化病。"]
+        ];
+
+        const plants = rawPlants.map(p => ({
+            name: p[0],
+            category: p[1],
+            tags: p[2].split(','),
+            highlight: p[3],
+            target: p[4],
+            flaw: p[5]
+        }));
+
+        // --- 应用状态与逻辑 ---
+        
+        const app = document.getElementById('app');
+        let currentStep = 0; 
+        let userAnswers = []; 
+
+        function render() {
+            app.innerHTML = '';
+            if (currentStep === 0) {
+                renderStart();
+            } else if (currentStep > 0 && currentStep <= questions.length) {
+                renderQuestion(currentStep - 1);
+            } else if (currentStep === questions.length + 1) {
+                renderUnlock(); 
+            } else {
+                renderResult();
+            }
+        }
+
+        // 封面页
+        function renderStart() {
+            const html = `
+                <div class="fade-in flex flex-col items-center justify-center h-full pt-10 text-center">
+                    <div class="w-24 h-24 mb-6 rounded-full bg-morandi-card flex items-center justify-center shadow-sm border border-morandi-border">
+                        <span class="text-4xl">🪴</span>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-morandi-text mb-4">测测你的本命植物</h2>
+                    <p class="text-morandi-subtext mb-10 px-4 leading-relaxed text-sm">
+                        你是清冷高级的马醉木，<br>还是热情奔放的蓝雪花？<br>15道题，抛开玄学，从真实生活轨迹出发，<br>匹配那株与你灵魂共振的植物伴侣。
+                    </p>
+                    <button onclick="nextStep()" class="bg-morandi-primary hover:bg-morandi-hover text-white font-medium py-3 px-12 rounded-full shadow-md transition-all active:scale-95">
+                        开始测试
+                    </button>
+                    <p class="mt-6 text-xs text-morandi-border/80">全网50种网红/经典植物库匹配</p>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        // 答题页
+        function renderQuestion(index) {
+            const q = questions[index];
+            let optionsHtml = '';
+            q.options.forEach((opt) => {
+                optionsHtml += `
+                    <button onclick="selectOption('${opt.tags.join(',')}')" 
+                        class="option-btn w-full text-left p-5 mb-4 rounded-2xl border-2 border-morandi-border bg-white text-morandi-text hover:border-morandi-primary/50 transition-all shadow-sm">
+                        ${opt.text}
+                    </button>
+                `;
+            });
+
+            const html = `
+                <div class="fade-in flex flex-col h-full mt-4">
+                    <div class="flex justify-between items-center mb-6 text-sm text-morandi-subtext font-medium">
+                        <span class="tracking-wide">Q${index + 1}</span>
+                        <span>${index + 1} / ${questions.length}</span>
+                    </div>
+                    
+                    <!-- 进度条 -->
+                    <div class="w-full bg-morandi-border/50 h-1.5 rounded-full mb-8">
+                        <div class="bg-morandi-primary h-1.5 rounded-full transition-all duration-300" style="width: ${((index + 1) / questions.length) * 100}%"></div>
+                    </div>
+
+                    <h3 class="text-xl font-medium text-morandi-text mb-8 leading-snug">${q.question}</h3>
+                    
+                    <div class="flex-1 flex flex-col">
+                        ${optionsHtml}
+                        <button onclick="prevStep()" class="mt-auto mb-6 w-full bg-transparent border-2 border-morandi-border text-morandi-subtext hover:bg-white hover:text-morandi-text font-medium py-3.5 rounded-2xl transition-all active:scale-95">
+                            ${index === 0 ? '返回首页' : '返回上一题'}
+                        </button>
+                    </div>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        window.selectOption = function(tagsStr) {
+            if(tagsStr) {
+                userAnswers[currentStep - 1] = tagsStr.split(',');
+            }
+            setTimeout(() => {
+                nextStep();
+            }, 150); 
+        }
+
+        window.prevStep = function() {
+            if (currentStep > 0) {
+                currentStep--;
+                render();
+            }
+        }
+
+        function nextStep() {
+            currentStep++;
+            render();
+        }
+
+        function reset() {
+            currentStep = 0;
+            userAnswers = [];
+            render();
+        }
+
+        function calculateResult() {
+            let tagCounts = {};
+            const allTags = userAnswers.flat().filter(Boolean);
+            allTags.forEach(tag => {
+                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+            });
+
+            let bestPlant = null;
+            let maxScore = -1;
+            
+            plants.forEach(plant => {
+                let score = 0;
+                plant.tags.forEach(tag => {
+                    if (tagCounts[tag]) score += tagCounts[tag];
+                });
+                
+                // 引入一些微小的随机性防止相同标签下总是出现第一个结果
+                score += Math.random() * 0.1;
+
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestPlant = plant;
+                }
+            });
+
+            return bestPlant || plants[0];
+        }
+
+        // 解锁页
+        function renderUnlock() {
+            const html = `
+                <div class="fade-in flex flex-col items-center justify-center h-full pt-10 text-center">
+                    <div class="w-20 h-20 mb-6 rounded-full bg-white border-4 border-morandi-border flex items-center justify-center shadow-sm">
+                        <span class="text-3xl">🔐</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-morandi-text mb-3">你的灵魂植物已就绪 🌿</h2>
+                    <p class="text-morandi-subtext mb-8 px-6 leading-relaxed text-sm">
+                        前往店铺获取解锁码，解锁50种植物的深度性格解析与你的专属养护指南。
+                    </p>
+                    
+                    <div class="w-full max-w-xs mb-6 relative">
+                        <input type="text" id="unlockCode" maxlength="6" placeholder="输入6位解锁码" 
+                            class="w-full text-center px-4 py-3.5 rounded-2xl border-2 border-morandi-border focus:border-morandi-primary focus:outline-none bg-white text-morandi-text font-medium tracking-[0.3em] shadow-sm transition-all">
+                        <p id="errorMsg" class="text-morandi-error text-xs mt-3 hidden fade-in font-medium">解锁码错误，请检查哦</p>
+                    </div>
+
+                    <button onclick="verifyCode()" class="w-full max-w-xs bg-morandi-primary hover:bg-morandi-hover text-white font-bold py-3.5 rounded-2xl shadow-sm transition-all active:scale-95 mb-4">
+                        确认解锁
+                    </button>
+                    <button onclick="prevStep()" class="w-full max-w-xs bg-transparent text-morandi-subtext hover:text-morandi-text text-sm py-2 transition-all">
+                        返回上一题修改答案
+                    </button>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        window.verifyCode = function() {
+            const code = document.getElementById('unlockCode').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            
+            // 自动读取配置文件的密码，如果读取失败则默认使用 888888
+            const correctCode = typeof GLOBAL_PASSWORD !== 'undefined' ? GLOBAL_PASSWORD : '888888';
+            if (code === correctCode) {
+                nextStep();
+            } else {
+                errorMsg.classList.remove('hidden'); 
+            }
+        }
+
+        // 结果页
+        function renderResult() {
+            const plant = calculateResult();
+            
+            const html = `
+                <div class="fade-in flex flex-col items-center pt-2 pb-6">
+                    <p class="text-xs text-morandi-subtext mb-2">经过灵魂匹配，你的本命植物是</p>
+                    <h2 class="text-4xl font-bold text-morandi-text mb-1 tracking-wider">${plant.name}</h2>
+                    <p class="text-sm px-3 py-1 bg-morandi-tag text-morandi-tagText rounded-full mb-8 font-medium">
+                        ${plant.category}
+                    </p>
+
+                    <div class="w-full bg-white rounded-3xl p-6 shadow-sm border border-morandi-border mb-8 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-morandi-bg rounded-full opacity-50"></div>
+                        
+                        <div class="mb-5 relative z-10">
+                            <h4 class="text-sm font-bold text-morandi-text mb-2 flex items-center">
+                                <span class="mr-2">✨</span> 美学亮点
+                            </h4>
+                            <p class="text-sm text-morandi-text/90 leading-relaxed bg-morandi-bg/50 p-3 rounded-xl">
+                                ${plant.highlight}
+                            </p>
+                        </div>
+                        
+                        <div class="mb-5 relative z-10">
+                            <h4 class="text-sm font-bold text-morandi-text mb-2 flex items-center">
+                                <span class="mr-2">🧍‍♀️</span> 代表的性格
+                            </h4>
+                            <p class="text-sm text-morandi-text/90 leading-relaxed bg-morandi-bg/50 p-3 rounded-xl">
+                                适合${plant.target}
+                            </p>
+                        </div>
+                        
+                        <div class="relative z-10">
+                            <h4 class="text-sm font-bold text-morandi-text mb-2 flex items-center">
+                                <span class="mr-2">☁️</span> 养护小吐槽
+                            </h4>
+                            <p class="text-sm text-morandi-text/90 leading-relaxed bg-morandi-bg/50 p-3 rounded-xl">
+                                ${plant.flaw}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col w-full gap-3">
+                        <button onclick="alert('截图功能受浏览器限制，请直接长按屏幕或使用手机自带截图功能分享哦～')" class="w-full bg-morandi-primary hover:bg-morandi-hover text-white font-medium py-3.5 rounded-2xl shadow-sm transition-all active:scale-95">
+                            截图保存，发小红书
+                        </button>
+                        <button onclick="reset()" class="w-full bg-white border border-morandi-border text-morandi-subtext font-medium py-3.5 rounded-2xl shadow-sm transition-all active:scale-95">
+                            重新测试
+                        </button>
+                    </div>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        window.onload = () => {
+            render();
+        };
+    </script>
+</body>
+</html>
