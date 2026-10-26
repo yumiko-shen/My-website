@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>测测你的本命定居城市 | 你最适合在哪长期定居？</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        morandi: {
+                            bg: '#F6F4EF',      // 浅奶茶色背景
+                            card: '#FFFFFF',    // 卡片白
+                            text: '#5A534E',    // 深灰棕色文字
+                            subtext: '#988F8A', // 浅灰棕色次要文字
+                            border: '#EBE5DB',  // 柔和边框
+                            primary: '#C5B3A6', // 灰粉/燕麦色主色调
+                            hover: '#B5A294',   // 主色调悬浮
+                            tag: '#D3D8CF',     // 莫兰迪薄荷绿/灰绿
+                            tagText: '#5E6B57'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"PingFang SC"', '"Helvetica Neue"', 'STHeiti', 'Microsoft Yahei', 'Tahoma', 'Simsun', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F6F4EF;
+            color: #5A534E;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* 简单淡入动画 */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 隐藏滚动条但保留滚动功能 */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        /* 选项点击时的软反馈 */
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-morandi-primary selection:text-white">
+
+    <!-- 顶部固定标题 -->
+    <header class="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-morandi-border z-50 transition-all">
+        <div class="max-w-md mx-auto px-4 h-12 flex items-center justify-center">
+            <h1 class="text-sm font-medium text-morandi-text truncate tracking-wide">
+                测测你的本命定居城市 | 你最适合在哪长期定居？
+            </h1>
+        </div>
+    </header>
+
+    <!-- 主体内容区，限制最大宽度以适配手机且在PC端居中 -->
+    <main id="app" class="flex-1 w-full max-w-md mx-auto pt-16 pb-8 px-4 flex flex-col relative">
+        <!-- 内容由JS动态渲染 -->
+    </main>
+
+    <script>
+        // --- 数据定义区 ---
+
+        // 1. 题目数据 (15题)
+        const questions = [
+            {
+                question: "1. 你最理想的气候状态是？",
+                options: [
+                    { text: "四季分明，能感受春花秋月冬雪", tags: ["four_seasons"] },
+                    { text: "温暖如春，不想经历严寒", tags: ["warm"] },
+                    { text: "偏凉爽一点，夏天不要太热", tags: ["cool"] },
+                    { text: "无所谓，只要室内空调暖气足就行", tags: ["any_climate"] }
+                ]
+            },
+            {
+                question: "2. 你期望的日常通勤与生活节奏是？",
+                options: [
+                    { text: "充满干劲，节奏快但机会多", tags: ["fast"] },
+                    { text: "适中就好，工作生活能平衡", tags: ["medium_pace"] },
+                    { text: "彻底松弛，喝茶发呆慢悠悠", tags: ["slow"] },
+                    { text: "随性自由，想快就快想慢就慢", tags: ["any_pace"] }
+                ]
+            },
+            {
+                question: "3. 你的胃更偏向哪种美食？",
+                options: [
+                    { text: "无辣不欢，重口味星人", tags: ["spicy"] },
+                    { text: "清淡鲜美，注重食材原味", tags: ["light_food"] },
+                    { text: "精致甜点、咖啡馆重度依赖", tags: ["sweet", "cafe"] },
+                    { text: "国际化多元，想吃全世界的料理", tags: ["global_food"] }
+                ]
+            },
+            {
+                question: "4. 对于社交和人群，你的态度是？",
+                options: [
+                    { text: "喜欢热闹，周末要有丰富的活动和聚会", tags: ["noisy"] },
+                    { text: "偏向安静，享受独处或高质量小圈子", tags: ["quiet"] },
+                    { text: "极度渴望多元包容、志同道合的社区", tags: ["diverse"] },
+                    { text: "都可以，能进能退", tags: ["any_vibe"] }
+                ]
+            },
+            {
+                question: "5. 你对生活成本和收入的期待？",
+                options: [
+                    { text: "高薪高消费，愿意为品质买单", tags: ["expensive"] },
+                    { text: "追求高性价比，物价感人最重要", tags: ["cheap"] },
+                    { text: "够花就行，不追求大富大贵", tags: ["medium_budget"] },
+                    { text: "已经/快要攒够钱，只看风景不看物价", tags: ["rich"] }
+                ]
+            },
+            {
+                question: "6. 周末想出门透气，你最希望看到？",
+                options: [
+                    { text: "浪漫的大海和沙滩", tags: ["sea"] },
+                    { text: "清新的森林、草地或雪山", tags: ["mountain", "nature"] },
+                    { text: "打理精致的城市公园和街道", tags: ["city_park"] },
+                    { text: "无边无际的荒野或异域风光", tags: ["wild"] }
+                ]
+            },
+            {
+                question: "7. 你能接受的环境湿度是？",
+                options: [
+                    { text: "干燥一点好，受不了发霉", tags: ["dry"] },
+                    { text: "喜欢湿润，甚至觉得回南天也还好", tags: ["wet"] },
+                    { text: "最好干湿适中", tags: ["medium_humid"] },
+                    { text: "完全没感觉，我适应力超强", tags: ["any_humid"] }
+                ]
+            },
+            {
+                question: "8. 城市包容度对你来说有多重要？",
+                options: [
+                    { text: "非常重要，必须是对少数群体/奇装异服友好的地方", tags: ["diverse"] },
+                    { text: "有特定的小圈子就行，不需要全城包容", tags: ["circle"] },
+                    { text: "只要大家互不打扰就好，注重边界感", tags: ["privacy"] },
+                    { text: "比较喜欢传统一点、有规矩的人情社会", tags: ["traditional"] }
+                ]
+            },
+            {
+                question: "9. 日常出行，你最偏好？",
+                options: [
+                    { text: "四通八达的地铁/公交，不用自己开车", tags: ["public_transport"] },
+                    { text: "喜欢自己开车兜风，路要宽", tags: ["drive"] },
+                    { text: "最好能步行/骑车搞定生活圈", tags: ["walk"] },
+                    { text: "常出差或旅行，必须有大型国际机场", tags: ["fly"] }
+                ]
+            },
+            {
+                question: "10. 理想中的完美周末是在做什么？",
+                options: [
+                    { text: "逛看展、看剧、打卡网红咖啡馆", tags: ["art", "cafe"] },
+                    { text: "徒步、露营、滑雪等户外运动", tags: ["outdoor"] },
+                    { text: "去夜市吃路边摊，感受市井烟火", tags: ["street_food"] },
+                    { text: "宅在家里做饭、打游戏、睡觉", tags: ["home"] }
+                ]
+            },
+            {
+                question: "11. 吸引你的城市质感是哪一种？",
+                options: [
+                    { text: "底蕴深厚，随处可见历史古迹", tags: ["history"] },
+                    { text: "摩登现代，高楼林立赛博朋克", tags: ["modern"] },
+                    { text: "异国情调，满街是不同风格的建筑", tags: ["exotic"] },
+                    { text: "自然古朴，像个美丽的大村落", tags: ["village"] }
+                ]
+            },
+            {
+                question: "12. 关于定居地的地理位置，你的打算是？",
+                options: [
+                    { text: "绝对呆在国内，中国胃中国心", tags: ["cn_only", "domestic"] },
+                    { text: "向往英语国家，沟通相对容易", tags: ["intl_eng", "intl"] },
+                    { text: "愿意去小语种国家，体验截然不同的文化", tags: ["intl_other", "intl"] },
+                    { text: "看缘分，国内外哪里舒服去哪里", tags: ["any_loc"] }
+                ]
+            },
+            {
+                question: "13. 你对日照和阳光的需求度？",
+                options: [
+                    { text: "向日葵体质，必须天天大晴天", tags: ["sunny"] },
+                    { text: "反而喜欢阴雨天的忧郁感和松弛感", tags: ["rainy"] },
+                    { text: "正常交替就好，夏天别太晒", tags: ["medium_sun"] },
+                    { text: "室内宅，外边天气与我无关", tags: ["any_sun"] }
+                ]
+            },
+            {
+                question: "14. 你对生活便利度（外卖/快递/医疗）的要求？",
+                options: [
+                    { text: "必须极度便利，半夜能点外卖能看病", tags: ["convenient"] },
+                    { text: "习惯自己做饭，慢节奏也能接受", tags: ["slow_life"] },
+                    { text: "年纪大了/惜命，必须有顶尖医疗资源", tags: ["medical"] },
+                    { text: "有个基本的大超市和诊所就足够", tags: ["basic"] }
+                ]
+            },
+            {
+                question: "15. 如果去新城市只能带走一样东西，你会选？",
+                options: [
+                    { text: "一笔丰厚的启动资金", tags: ["money"] },
+                    { text: "一个伴侣或最好的朋友", tags: ["love"] },
+                    { text: "一身走遍天下都不怕的技能", tags: ["freedom"] },
+                    { text: "一颗永远充满好奇的强大内心", tags: ["spirit"] }
+                ]
+            }
+        ];
+
+        // 2. 城市数据 (50个：25国内 + 25国外)
+        // 数据格式: [城市名, 地区, tag字符串, 亮点, 适合人群, 吐槽]
+        const rawCities = [
+            // --- 国内 25个 ---
+            ["成都", "国内", "domestic,slow,spicy,medium_humid,street_food,history", "满城茶香与火锅交织，生活节奏松弛有度，真正的“巴适得板”。", "享受烟火气、热爱好吃好喝的享乐主义者。", "冬季有点阴冷，难得见太阳，紫外线偏弱。"],
+            ["杭州", "国内", "domestic,medium_pace,light_food,wet,city_park,art", "互联网活力与江南水乡完美融合，西湖边吹风最是惬意。", "喜欢精雅生活、兼顾事业与生活品质的人。", "夏季闷热，梅雨季较长，物价和房价偏高。"],
+            ["大理", "国内", "domestic,slow,cheap,mountain,wild,sunny", "苍山洱海的浪漫，永远的阳光与风，国内数字游民的乌托邦。", "向往自由、文艺青年、想逃离内卷的人。", "医疗和现代便利设施相对一般，风季风很大。"],
+            ["上海", "国内", "domestic,fast,global_food,diverse,public_transport,modern,cafe", "极致的便利与国际化，咖啡馆密度全国第一，永远充满新鲜感。", "有野心、注重边界感、追求精致生活的人。", "生活成本极高，节奏快压力大，黄梅天潮湿。"],
+            ["广州", "国内", "domestic,medium_pace,light_food,wet,convenient,history", "务实且充满人情味，早茶文化无敌，包容度极高的千年商都。", "务实派、吃货、不喜欢装腔作势的人。", "回南天让人崩溃，夏季漫长且湿热。"],
+            ["深圳", "国内", "domestic,fast,city_park,modern,convenient", "千园之城，永远年轻，效率极高，搞钱最前线。", "充满干劲的年轻人、喜欢高效现代生活的人。", "文化底蕴相对薄弱，生活节奏快到飞起。"],
+            ["北京", "国内", "domestic,fast,history,public_transport,dry,medical", "深厚的文化底蕴与无限的宏大叙事并存，机遇与挑战同在。", "有大梦想、喜欢北方文化和历史厚重感的人。", "气候干燥多风沙，通勤时间长，冬天干冷。"],
+            ["苏州", "国内", "domestic,medium_pace,sweet,history,city_park", "园林里的温婉岁月，经济发达却不失江南慢调。", "喜欢温润如玉的慢生活，但又需要完善配套的人。", "饮食偏甜，冬天湿冷没有集中供暖。"],
+            ["珠海", "国内", "domestic,slow,sea,warm,city_park", "百岛之市，浪漫的滨海大道，空气质量常年霸榜。", "喜欢看海、向往安逸养老生活的人。", "经济体量较小，工作机会不如一线城市多。"],
+            ["威海", "国内", "domestic,slow,sea,cheap,four_seasons", "干净到发光的北方海滨小城，冬天有绝美雪景，物价感人。", "追求高性价比海景房、喜欢北方海滨的人。", "冬天雪太大有时会封路（雪窝子），风大。"],
+            ["泉州", "国内", "domestic,slow,history,traditional,sea,street_food", "半城烟火半城仙，红砖古厝与宗教文化交融，极具特色。", "喜欢历史人文、热爱古早味小吃和传统文化的人。", "夏天湿热，公共交通不如大城市发达。"],
+            ["阿勒泰", "国内", "domestic,slow,wild,mountain,four_seasons,cheap", "真实版“绿野仙踪”，极致的雪山森林，纯粹的自然之美。", "热爱大自然、滑雪发烧友、寻求内心宁静的人。", "冬季极为漫长寒冷，快递慢，生活不够便利。"],
+            ["昆明", "国内", "domestic,medium_pace,warm,sunny,mountain", "四季如春，鲜花论斤卖，阳光明媚，气候在国内几乎无敌。", "怕冷又怕热、极度看重气候和阳光的人。", "紫外线极强，地处高原，部分人刚去可能有轻微反应。"],
+            ["重庆", "国内", "domestic,fast,spicy,modern,wet", "魔幻3D立体城市，热辣滚烫，夜景无敌。", "性格直爽、无辣不欢、喜欢赛博朋克感的人。", "爬坡上坎费废腿，夏天极热，几乎没有非机动车道。"],
+            ["长沙", "国内", "domestic,medium_pace,spicy,street_food,noisy", "不夜城，娱乐之都，茶颜悦色与小龙虾的快乐老家。", "夜猫子、喜欢热闹社交、爱吃辣的人。", "夏季酷热冬季湿冷，气候条件较为硬伤。"],
+            ["西安", "国内", "domestic,medium_pace,history,dry,street_food", "十三朝古都，碳水爱好者的天堂，一砖一瓦都是故事。", "热爱历史文化、喜欢面食、偏好北方气候的人。", "气候较干燥，冬天偶尔有雾霾。"],
+            ["青岛", "国内", "domestic,medium_pace,sea,cool,modern", "红瓦绿树，碧海蓝天，夏天喝袋装啤酒吃海鲜的快乐。", "喜欢欧式风情与大海、热爱海鲜的人。", "物价偏高但工资相对一般，冬天海风刺骨。"],
+            ["厦门", "国内", "domestic,slow,sea,warm,sweet,cafe", "文艺清新的代名词，环岛路骑行，满城三角梅。", "文艺青年、喜欢慢节奏小资生活的人。", "房价高昂，夏天经常有台风光顾。"],
+            ["丽江", "国内", "domestic,slow,village,mountain,sunny", "雪山下的古城，永远不缺阳光和故事，节奏慢到停滞。", "想彻底躺平、喜欢晒太阳发呆的人。", "商业化较重，工作机会极少，适合带资隐居。"],
+            ["南京", "国内", "domestic,medium_pace,history,city_park", "六朝古都，梧桐树下的浪漫，充满厚重感与高校人文气息。", "喜欢人文历史、向往平衡生活的人。", "夏天是著名“火炉”，闷热难耐，冬天湿冷。"],
+            ["武汉", "国内", "domestic,fast,street_food,history", "江湖气十足，过早文化极其丰富，充满烟火气与活力。", "性格豪爽、热爱碳水美食的人。", "气候比较极端，夏天极热冬天极冷。"],
+            ["三亚", "国内", "domestic,slow,sea,warm,sunny", "国内热带海滨的顶点，椰风树影，永远的夏天。", "极度怕冷、喜欢热带海岛风情的人。", "物价偏高，夏天炎热，外地人多缺乏本土社区感。"],
+            ["景德镇", "国内", "domestic,slow,art,village,cheap", "年轻艺术家的“景漂”圣地，遍地陶瓷与市集，文艺气息拉满。", "做手工/艺术的人、数字游民、喜欢陶瓷文化的人。", "基础设施相对落后，除了陶瓷相关，其他产业薄弱。"],
+            ["延吉", "国内", "domestic,slow,spicy,exotic,cheap", "不出国就能体验纯正朝鲜族风情，冷面烧烤美食极度丰富。", "吃货、喜欢异域风情但又不想出国的人。", "冬季非常寒冷，城市规模较小。"],
+            ["拉萨", "国内", "domestic,slow,wild,mountain,sunny", "日光之城，信仰的力量，极致的高原风光。", "追求精神洗礼、热爱藏文化、喜欢纯净阳光的人。", "海拔高容易缺氧，气候干燥，物流不便。"],
+
+            // --- 国外 25个 ---
+            ["墨尔本", "国外", "intl_eng,intl,medium_pace,cafe,art,four_seasons,diverse", "世界宜居城市常客，咖啡文化极其发达，艺术氛围浓厚。", "热爱咖啡与艺术、向往多元文化、追求work-life balance的人。", "一天有四季，天气变化比翻书还快。"],
+            ["温哥华", "国外", "intl_eng,intl,slow,mountain,sea,rainy,diverse", "山海交融的自然天花板，极其包容，北美最宜居的城市之一。", "热爱户外运动、享受慢生活、喜欢大自然的人。", "冬季漫长且多雨（Raincouver），物价和房价极高。"],
+            ["京都", "国外", "intl_other,intl,slow,history,quiet,traditional", "鸭川的微风，古寺的钟声，极致的日式美学与禅意。", "喜欢安静、热爱传统文化与和风美学的人。", "社会阶层相对固化，对外地人有隐形壁垒，夏天闷热。"],
+            ["巴塞罗那", "国外", "intl_other,intl,slow,sea,art,warm,sunny", "高迪的梦幻建筑，地中海的阳光与沙滩，永远充满热情。", "艺术家灵魂、喜欢阳光沙滩、热衷夜生活的人。", "小偷较多需要时刻警惕，夏季非常炎热。"],
+            ["清迈", "国外", "intl_other,intl,slow,cheap,cafe,warm,exotic", "物价极低的泰北玫瑰，满街的平价咖啡馆和寺庙，数字游民圣地。", "预算有限但追求生活品质、数字游民、想躺平的人。", "烧山季（每年2-4月）空气污染严重，气候炎热。"],
+            ["阿姆斯特丹", "国外", "intl_eng,intl,medium_pace,walk,diverse,modern", "运河交织的自行车之城，极致的包容与自由，设计感拉满。", "思想前卫、喜欢骑行兜风、追求极度自由的人。", "天气经常阴雨绵绵，冬天风大且冷，住房极其紧张。"],
+            ["雷克雅未克", "国外", "intl_other,intl,slow,wild,cool,quiet", "世界尽头的冷酷仙境，极致的孤独与安全感，冰川与极光。", "i人天堂、极简主义者、不惧怕寒冷与孤独的人。", "物价极其高昂，冬季黑夜漫长，缺乏世俗娱乐。"],
+            ["伦敦", "国外", "intl_eng,intl,fast,history,art,rainy,global_food", "古老与现代的完美碰撞，博物馆和剧院看不完，真正的世界中心。", "追求顶尖文化艺术、有事业抱负、喜欢英伦风的人。", "生活成本极高，天气常年阴郁，交通费贵到心碎。"],
+            ["纽约", "国外", "intl_eng,intl,fast,modern,global_food,diverse,expensive", "永不沉睡的大苹果，无穷的机遇，只要你有梦就能在这里发光。", "野心家、精力旺盛、渴望体验大千世界的人。", "脏乱差的地铁，极高的房租，竞争压力极大。"],
+            ["东京", "国外", "intl_other,intl,fast,convenient,modern,public_transport,quiet", "极致的便利与秩序，二次元与赛博朋克的中心，一个人生活也很爽。", "重度社恐、喜欢便利生活、注重细节与规矩的人。", "社会压力大，职场文化压抑，夏天极度湿热。"],
+            ["新加坡", "国外", "intl_eng,intl,fast,warm,convenient,modern", "完美的花园城市，极度安全干净，中英双语无缝切换。", "看重治安、带娃家庭、喜欢高效热带城市的人。", "天气只有夏天，极度闷热，生活成本亚洲第一。"],
+            ["巴黎", "国外", "intl_other,intl,medium_pace,history,art,sweet", "流动的盛宴，塞纳河畔的浪漫，空气里都是可颂和香水味。", "无可救药的浪漫主义者、热爱时尚与艺术的人。", "治安问题严重，行政效率极低（法国式浪漫的代价）。"],
+            ["悉尼", "国外", "intl_eng,intl,fast,sea,sunny,diverse", "明媚的南半球明珠，绝美的海港和沙滩，充满活力的阳光之城。", "喜欢冲浪海滩、性格开朗、向往阳光的人。", "房价高昂，夏天偶尔极端高温，防晒要当心。"],
+            ["柏林", "国外", "intl_other,intl,medium_pace,diverse,art,cheap", "贫穷但性感，欧洲电子乐与亚文化中心，包容一切特立独行。", "亚文化爱好者、艺术家、不走寻常路的人。", "冬天阴冷漫长，城市略显破旧，德语学习有难度。"],
+            ["曼谷", "国外", "intl_other,intl,fast,warm,street_food,cheap", "热烈喧嚣的微笑之都，从路边摊到顶奢商场应有尽有。", "喜欢热闹烟火气、看重性价比、热爱按摩美食的人。", "交通拥堵严重，常年炎热，较为喧闹。"],
+            ["哥本哈根", "国外", "intl_other,intl,slow,walk,art,cool", "童话王国的首都，全球最幸福城市之一，极简北欧风发源地。", "注重生活品质（Hygge）、喜欢设计、环保主义者。", "税收高物价高，冬天日照时间极短。"],
+            ["奥克兰", "国外", "intl_eng,intl,slow,sea,mountain,nature", "千帆之都，被大自然环抱，拥有绝佳的海洋和火山景观。", "热爱大自然、向往平静安逸生活、佛系的人。", "公共交通落后（必须买车），被称为“大农村”。"],
+            ["苏黎世", "国外", "intl_other,intl,medium_pace,mountain,rich,quiet", "阿尔卑斯山下的童话，富裕且精致，湖光山色美到窒息。", "财务自由者、追求极致宁静与高品质生活的人。", "物价世界第一贵，生活有些无聊，缺乏夜生活。"],
+            ["罗马", "国外", "intl_other,intl,slow,history,sunny,walk", "露天的历史博物馆，阳光下的意面与冰淇淋，松弛感拉满。", "热爱古典历史、享受慢节奏意式生活（Dolce Vita）的人。", "基础设施老旧，交通混乱，夏天热浪滚滚。"],
+            ["赫尔辛基", "国外", "intl_other,intl,slow,nature,cool,quiet", "波罗的海的女儿，芬兰浴与森林，极度社恐友好的城市。", "注重个人空间（芬兰式社交距离）、热爱自然的人。", "极夜漫长，容易产生冬季抑郁，饮食相对单调。"],
+            ["旧金山", "国外", "intl_eng,intl,fast,modern,diverse,expensive", "金门大桥的雾气，科技与创新的心脏，极度包容且多元。", "科技从业者、追求前沿思想、喜欢起伏街道的人。", "满大街的流浪汉问题，房价物价令人咋舌。"],
+            ["洛杉矶", "国外", "intl_eng,intl,medium_pace,sunny,drive,sea", "天使之城，永远的阳光加州，电影工业与造梦之地。", "喜欢阳光沙滩、有汽车代步、充满梦想的人。", "没有车等于没有腿，交通极其拥堵，城市平摊面积大。"],
+            ["多伦多", "国外", "intl_eng,intl,fast,diverse,modern,cold", "北美最多元文化的城市，一半是繁华都市，一半是安大略湖。", "看重文化包容度、喜欢北美都市生活的人。", "冬天非常寒冷且漫长，常有暴风雪。"],
+            ["马德里", "国外", "intl_other,intl,medium_pace,sunny,street_food,history", "热情洋溢的伊比利亚中心，夜生活丰富，Tapas吃不停。", "性格开朗、喜欢阳光和夜生活、享受美食的人。", "夏天极热，午休文化（Siesta）导致下午办事不便。"],
+            ["大阪", "国外", "intl_other,intl,fast,street_food,noisy,convenient", "关西的厨房，充满人情味和幽默感，比东京更随性热闹。", "吃货、喜欢热闹吐槽、觉得东京太压抑的人。", "城市卫生和秩序相比东京略逊一筹，夏天一样闷热。"]
+        ];
+
+        // 将数组格式的城市数据转换为对象数组
+        const cities = rawCities.map(c => ({
+            name: c[0],
+            loc: c[1],
+            tags: c[2].split(','),
+            highlight: c[3],
+            target: c[4],
+            flaw: c[5]
+        }));
+
+        // --- 应用状态与逻辑 ---
+        
+        const app = document.getElementById('app');
+        let currentStep = 0; // 0 = 封面, 1~15 = 答题, 16 = 结果
+        let userAnswers = []; // 记录用户每道题的选项tags
+
+        // 渲染页面
+        function render() {
+            app.innerHTML = '';
+            
+            if (currentStep === 0) {
+                renderStart();
+            } else if (currentStep > 0 && currentStep <= questions.length) {
+                renderQuestion(currentStep - 1);
+            } else if (currentStep === questions.length + 1) {
+                renderUnlock(); // 拦截：插入解锁页
+            } else {
+                renderResult();
+            }
+        }
+
+        // 封面页
+        function renderStart() {
+            const html = `
+                <div class="fade-in flex flex-col items-center justify-center h-full pt-10 text-center">
+                    <div class="w-24 h-24 mb-6 rounded-full bg-morandi-light flex items-center justify-center shadow-sm">
+                        <span class="text-4xl">✈️</span>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-morandi-text mb-4">测测你的本命定居城市</h2>
+                    <p class="text-morandi-subtext mb-10 px-4 leading-relaxed text-sm">
+                        你究竟适合慢节奏的烟火古城，<br>还是繁华摩登的国际大都市？<br>15道题，抛开玄学，从真实生活需求出发，<br>找到那座写着你名字的城市。
+                    </p>
+                    <button onclick="nextStep()" class="bg-morandi-primary hover:bg-morandi-hover text-white font-medium py-3 px-12 rounded-full shadow-md transition-all active:scale-95">
+                        开始测试
+                    </button>
+                    <p class="mt-6 text-xs text-morandi-border/60">小红书风极简测试 · 全50城数据库</p>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        // 答题页
+        function renderQuestion(index) {
+            const q = questions[index];
+            
+            let optionsHtml = '';
+            q.options.forEach((opt, i) => {
+                // 点击选项直接触发下一题，传递tags
+                optionsHtml += `
+                    <button onclick="selectOption('${opt.tags.join(',')}')" 
+                        class="option-btn w-full text-left p-5 mb-4 rounded-2xl border-2 border-morandi-border bg-white text-morandi-text hover:border-morandi-primary transition-all shadow-sm">
+                        ${opt.text}
+                    </button>
+                `;
+            });
+
+            const html = `
+                <div class="fade-in flex flex-col h-full mt-4">
+                    <div class="flex justify-between items-center mb-6 text-sm text-morandi-subtext font-medium">
+                        <span class="tracking-wide">Q${index + 1}</span>
+                        <span>${index + 1} / ${questions.length}</span>
+                    </div>
+                    
+                    <!-- 进度条 -->
+                    <div class="w-full bg-morandi-border/50 h-1.5 rounded-full mb-8">
+                        <div class="bg-morandi-primary h-1.5 rounded-full transition-all duration-300" style="width: ${((index + 1) / questions.length) * 100}%"></div>
+                    </div>
+
+                    <h3 class="text-xl font-medium text-morandi-text mb-8 leading-snug">${q.question}</h3>
+                    
+                    <div class="flex-1 flex flex-col">
+                        ${optionsHtml}
+                        <button onclick="prevStep()" class="mt-2 mb-6 w-full bg-transparent border-2 border-morandi-border text-morandi-subtext hover:bg-white hover:border-morandi-subtext hover:text-morandi-text font-medium py-3.5 rounded-2xl transition-all active:scale-95">
+                            ${index === 0 ? '返回首页' : '返回上一题'}
+                        </button>
+                    </div>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        // 选择选项并进入下一步
+        window.selectOption = function(tagsStr) {
+            if(tagsStr) {
+                userAnswers[currentStep - 1] = tagsStr.split(',');
+            }
+            setTimeout(() => {
+                nextStep();
+            }, 150); // 微小的延迟，让用户看到点击反馈
+        }
+
+        window.prevStep = function() {
+            if (currentStep > 0) {
+                currentStep--;
+                render();
+            }
+        }
+
+        function nextStep() {
+            currentStep++;
+            render();
+        }
+
+        function reset() {
+            currentStep = 0;
+            userAnswers = [];
+            render();
+        }
+
+        // 计算结果
+        function calculateResult() {
+            // 统计用户tag频率
+            let tagCounts = {};
+            // 将所有答题结果展平
+            const allTags = userAnswers.flat().filter(Boolean);
+            allTags.forEach(tag => {
+                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+            });
+
+            let bestCity = null;
+            let maxScore = -1;
+
+            // 特殊强过滤逻辑 (Q12的国内/国外选择)
+            const isDomesticOnly = tagCounts['cn_only'] > 0;
+            const isIntlEng = tagCounts['intl_eng'] > 0;
+            const isIntlOther = tagCounts['intl_other'] > 0;
+            
+            cities.forEach(city => {
+                let score = 0;
+                
+                // 计算重合度得分
+                city.tags.forEach(tag => {
+                    if (tagCounts[tag]) {
+                        score += tagCounts[tag];
+                    }
+                });
+
+                // 应用强过滤权重
+                if (isDomesticOnly && city.loc === '国内') score += 10;
+                if ((isIntlEng || isIntlOther) && city.loc === '国外') score += 10;
+                // 如果想要英语区，给带有intl_eng的城市加分
+                if (isIntlEng && city.tags.includes('intl_eng')) score += 5;
+                if (isIntlOther && city.tags.includes('intl_other')) score += 5;
+
+                // 记录最高分
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestCity = city;
+                }
+            });
+
+            // 兜底防错
+            return bestCity || cities[0];
+        }
+
+        // 解锁页 (Paywall)
+        function renderUnlock() {
+            const html = `
+                <div class="fade-in flex flex-col items-center justify-center h-full pt-10 text-center">
+                    <div class="w-20 h-20 mb-6 rounded-full bg-white border-4 border-morandi-border flex items-center justify-center shadow-sm">
+                        <span class="text-3xl">🔐</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-morandi-text mb-3">您的灵魂定居地结果已就绪 ✈️</h2>
+                    <p class="text-morandi-subtext mb-8 px-6 leading-relaxed text-sm">
+                        前往店铺获取解锁码，解锁50城深度解析及你的专属定居指南。
+                    </p>
+                    
+                    <div class="w-full max-w-xs mb-6 relative">
+                        <input type="text" id="unlockCode" maxlength="6" placeholder="输入6位解锁码" 
+                            class="w-full text-center px-4 py-3.5 rounded-2xl border-2 border-morandi-border focus:border-morandi-primary focus:outline-none bg-white text-morandi-text font-medium tracking-[0.3em] shadow-sm transition-all">
+                        <!-- 温柔莫兰迪橘红色的错误提示 -->
+                        <p id="errorMsg" class="text-[#E07A5F] text-xs mt-3 hidden fade-in font-medium">解锁码错误，请检查哦</p>
+                    </div>
+
+                    <button onclick="verifyCode()" class="w-full max-w-xs bg-morandi-primary hover:bg-morandi-hover text-white font-bold py-3.5 rounded-2xl shadow-sm transition-all active:scale-95 mb-4">
+                        确认解锁
+                    </button>
+                    <button onclick="prevStep()" class="w-full max-w-xs bg-transparent text-morandi-subtext hover:text-morandi-text text-sm py-2 transition-all">
+                        返回上一题
+                    </button>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        // 验证解锁码逻辑
+        window.verifyCode = function() {
+            const code = document.getElementById('unlockCode').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            
+            // 此处硬编码了密码为 888888，你可以随时更改
+            if (code === '888888') {
+                errorMsg.classList.add('hidden');
+                nextStep(); // 密码正确，放行进入结果页
+            } else {
+                errorMsg.classList.remove('hidden'); // 密码错误，展示提示
+            }
+        }
+
+        // 结果页
+        function renderResult() {
+            const city = calculateResult();
+            
+            const html = `
+                <div class="fade-in flex flex-col items-center pt-2 pb-6">
+                    <p class="text-xs text-morandi-subtext mb-2">经过灵魂匹配，你的本命定居地是</p>
+                    <h2 class="text-4xl font-bold text-morandi-text mb-1 tracking-wider">${city.name}</h2>
+                    <p class="text-sm px-3 py-1 bg-morandi-tag text-morandi-tagText rounded-full mb-8 font-medium">
+                        ${city.loc}城市
+                    </p>
+
+                    <div class="w-full bg-white rounded-3xl p-6 shadow-sm border border-morandi-border mb-8 relative overflow-hidden">
+                        <!-- 装饰用的小圆圈 -->
+                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-morandi-bg rounded-full opacity-50"></div>
+                        
+                        <div class="mb-5 relative z-10">
+                            <h4 class="text-sm font-bold text-morandi-text mb-2 flex items-center">
+                                <span class="mr-2">✨</span> 宜居亮点
+                            </h4>
+                            <p class="text-sm text-morandi-text/90 leading-relaxed bg-morandi-bg/50 p-3 rounded-xl">
+                                ${city.highlight}
+                            </p>
+                        </div>
+                        
+                        <div class="mb-5 relative z-10">
+                            <h4 class="text-sm font-bold text-morandi-text mb-2 flex items-center">
+                                <span class="mr-2">🧍‍♀️</span> 适合人群
+                            </h4>
+                            <p class="text-sm text-morandi-text/90 leading-relaxed bg-morandi-bg/50 p-3 rounded-xl">
+                                ${city.target}
+                            </p>
+                        </div>
+                        
+                        <div class="relative z-10">
+                            <h4 class="text-sm font-bold text-morandi-text mb-2 flex items-center">
+                                <span class="mr-2">☁️</span> 小小吐槽
+                            </h4>
+                            <p class="text-sm text-morandi-text/90 leading-relaxed bg-morandi-bg/50 p-3 rounded-xl">
+                                ${city.flaw}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col w-full gap-3">
+                        <button onclick="alert('截图功能受浏览器限制，请直接长按屏幕或使用手机自带截图功能分享哦～')" class="w-full bg-morandi-primary hover:bg-morandi-hover text-white font-medium py-3.5 rounded-2xl shadow-sm transition-all active:scale-95">
+                            截图保存，发小红书
+                        </button>
+                        <button onclick="reset()" class="w-full bg-white border border-morandi-border text-morandi-subtext font-medium py-3.5 rounded-2xl shadow-sm transition-all active:scale-95">
+                            重新测试
+                        </button>
+                    </div>
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        // 初始化加载
+        window.onload = () => {
+            render();
+        };
+
+    </script>
+</body>
+</html>
