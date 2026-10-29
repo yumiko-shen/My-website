@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>测测未来三年你的运势主打方向是什么</title>
+    <!-- Mocking the external config for the preview environment -->
+    <script>
+        if (typeof GLOBAL_PASSWORD === 'undefined') {
+            window.GLOBAL_PASSWORD = '888888';
+        }
+    </script>
+    <!-- In production, uncomment the line below if you have a config.js -->
+    <!-- <script src="../config.js"></script> -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 星空塔罗高级风配色体系 */
+        :root {
+            --starry-blue: #0F1423; /* 星空夜蓝 */
+            --card-bg: #1C2333;     /* 塔罗牌卡片底色 */
+            --champagne: #DBC18B;   /* 香槟金 */
+            --pearl: #F4F4F6;       /* 珍珠白 */
+            --dark-gold: #B89C63;
+        }
+        body {
+            background-color: var(--starry-blue);
+            color: var(--pearl);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(219, 193, 139, 0.05), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(219, 193, 139, 0.05), transparent 25%);
+        }
+        
+        /* 平滑动画 */
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .fade-out { animation: fadeOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-15px); } }
+        
+        /* 按钮与卡片样式 */
+        .option-btn {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(219, 193, 139, 0.25);
+            color: var(--pearl);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .option-btn:active, .option-btn:hover {
+            background-color: rgba(219, 193, 139, 0.15);
+            border-color: var(--champagne);
+            transform: scale(0.98);
+            box-shadow: 0 0 15px rgba(219, 193, 139, 0.2);
+        }
+        
+        .primary-btn {
+            background: linear-gradient(135deg, var(--dark-gold) 0%, var(--champagne) 100%);
+            color: var(--starry-blue);
+            box-shadow: 0 4px 20px rgba(219, 193, 139, 0.3);
+            transition: all 0.2s;
+        }
+        .primary-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 10px rgba(219, 193, 139, 0.15);
+        }
+        
+        .result-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 1px solid rgba(219, 193, 139, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 卡片光泽效果 */
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+            transform: skewX(-25deg);
+            animation: shine 6s infinite;
+        }
+        @keyframes shine { 0% {left: -100%;} 20% {left: 200%;} 100% {left: 200%;} }
+
+        .progress-bar-fill { background: linear-gradient(90deg, var(--dark-gold), var(--champagne)); }
+        .tag-pill {
+            background-color: rgba(219, 193, 139, 0.1);
+            border: 1px solid rgba(219, 193, 139, 0.4);
+            color: var(--champagne);
+        }
+        .content-box {
+            background-color: rgba(15, 20, 35, 0.6);
+            border-left: 3px solid var(--champagne);
+        }
+        
+        .gold-text {
+            background: linear-gradient(to right, #DBC18B, #F9F2D8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .glow-border {
+            border: 2px solid rgba(219, 193, 139, 0.4);
+            box-shadow: 0 0 25px rgba(219, 193, 139, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-5 pb-12 overflow-x-hidden">
+
+    <!-- 首页 -->
+    <div id="page-home" class="w-full max-w-md mt-20 fade-in flex flex-col items-center text-center z-10">
+        <div class="w-24 h-24 mb-6 rounded-full flex items-center justify-center glow-border relative bg-[#1C2333]">
+            <span class="text-5xl">🌌</span>
+        </div>
+        <span class="text-xs font-bold tracking-[0.3em] text-[#DBC18B] mb-4 uppercase opacity-80">Tarot of Destiny</span>
+        <h1 class="text-3xl font-extrabold mb-6 leading-snug gold-text tracking-wide">测测未来三年你的<br>运势主打方向</h1>
+        <p class="text-[15px] text-[#A0A5B5] mb-12 leading-relaxed px-2">
+            命运的星轨正在悄然转移，<br>
+            潜意识的直觉，藏着宇宙给你的神秘预言。<br>
+            15道题，为你揭开未来三年的专属剧本。
+        </p>
+        <button onclick="startTest()" class="primary-btn w-full py-4 rounded-2xl font-bold text-lg tracking-widest">
+            开启星盘预测
+        </button>
+    </div>
+
+    <!-- 答题页 -->
+    <div id="page-quiz" class="w-full max-w-md mt-10 hidden flex flex-col z-10">
+        <div class="flex justify-between items-center mb-10">
+            <span id="q-progress" class="text-sm font-semibold text-[#DBC18B] tracking-wider">1 / 15</span>
+            <div class="h-1.5 w-2/3 bg-[#1C2333] rounded-full overflow-hidden border border-[rgba(219,193,139,0.1)]">
+                <div id="q-bar" class="h-full progress-bar-fill transition-all duration-300 w-[6.6%] shadow-[0_0_10px_#DBC18B]"></div>
+            </div>
+        </div>
+        <h2 id="q-title" class="text-[19px] font-bold mb-8 leading-relaxed text-[#F4F4F6] px-1 tracking-wide"></h2>
+        <div id="q-options" class="flex flex-col gap-4 mb-10"></div>
+        <button id="btn-prev" onclick="prevQuestion()" class="mt-auto py-4 text-[#8C93A8] text-sm font-medium hidden hover:text-[#DBC18B] transition-colors">
+            ← 返回上一题
+        </button>
+    </div>
+
+    <!-- 解锁页 -->
+    <div id="page-unlock" class="w-full max-w-md mt-20 hidden flex-col items-center text-center z-10">
+        <div class="w-20 h-20 rounded-full flex items-center justify-center mb-6 glow-border bg-[#1C2333]">
+            <span class="text-3xl">🔮</span>
+        </div>
+        <h2 class="text-2xl font-bold mb-4 gold-text tracking-widest">星盘解析已完成</h2>
+        <p class="text-[15px] text-[#A0A5B5] mb-10 px-4 leading-relaxed">
+            关于你未来三年的主旋律与高光时刻<br>已经就绪，请输入占星秘钥解锁。
+        </p>
+        <input type="text" id="unlock-code" placeholder="输入6位解锁码" class="w-full text-center py-4 rounded-2xl border border-[rgba(219,193,139,0.4)] bg-[#1C2333] text-[#DBC18B] focus:outline-none focus:border-[#DBC18B] focus:shadow-[0_0_15px_rgba(219,193,139,0.3)] text-lg font-bold mb-4 tracking-widest transition-all">
+        <p id="error-msg" class="text-[#FF8A8A] text-sm mb-4 hidden font-medium">秘钥不正确，请重新输入</p>
+        <button onclick="verifyCode()" class="primary-btn w-full py-4 rounded-2xl font-bold text-lg mb-6 tracking-widest">
+            揭晓未来运势
+        </button>
+        <button onclick="prevQuestion()" class="py-3 text-[#8C93A8] text-sm font-medium w-full hover:text-[#DBC18B] transition-colors">
+            ← 返回修改最后一题
+        </button>
+    </div>
+
+    <!-- 结果页 -->
+    <div id="page-result" class="w-full max-w-md hidden flex flex-col items-center pb-10 mt-8 z-10">
+        <span class="text-xs font-bold tracking-[0.2em] text-[#DBC18B] mb-3 uppercase opacity-90">Your Future Fortune</span>
+        <h1 class="text-[20px] font-bold text-[#F4F4F6] mb-6 tracking-wide">未来三年你的运势主打</h1>
+        
+        <h2 id="res-name" class="text-2xl font-extrabold mb-4 gold-text text-center px-2 leading-tight"></h2>
+        <span id="res-tag" class="px-5 py-2 tag-pill rounded-full text-sm font-bold mb-8 tracking-wide"></span>
+
+        <div class="result-card w-full p-6 mb-8 text-left">
+            <div class="mb-7">
+                <h3 class="text-[16px] font-bold text-[#DBC18B] mb-3 flex items-center tracking-wide"><span class="mr-2 text-lg">✨</span> 未来三年主旋律</h3>
+                <p id="res-main" class="text-[14.5px] text-[#D1D5E0] leading-relaxed content-box p-4 rounded-xl"></p>
+            </div>
+            <div class="mb-7">
+                <h3 class="text-[16px] font-bold text-[#DBC18B] mb-3 flex items-center tracking-wide"><span class="mr-2 text-lg">🌟</span> 高光爆发时刻</h3>
+                <p id="res-highlight" class="text-[14.5px] text-[#D1D5E0] leading-relaxed content-box p-4 rounded-xl"></p>
+            </div>
+            <div>
+                <h3 class="text-[16px] font-bold text-[#DBC18B] mb-3 flex items-center tracking-wide"><span class="mr-2 text-lg">⚠️</span> 扎心避坑指南</h3>
+                <p id="res-advice" class="text-[14.5px] text-[#D1D5E0] leading-relaxed content-box p-4 rounded-xl"></p>
+            </div>
+        </div>
+
+        <button onclick="location.reload()" class="w-full py-4 rounded-2xl font-bold text-lg bg-transparent border-2 border-[#DBC18B] text-[#DBC18B] hover:bg-[rgba(219,193,139,0.1)] active:scale-95 transition-all tracking-widest">
+            重新抽取星盘
+        </button>
+    </div>
+
+    <script>
+        // 15道测试题
+        const questions = [
+            { q: "如果你在迷雾森林里捡到一把古老的钥匙，你直觉它能打开什么？", options: ["装满失落金币的宝箱", "一扇通往平行时空的门", "一本记载未来命运的魔法书", "一间藏着前世记忆的小木屋"] },
+            { q: "面对突如其来的天降好机会，你内心的第一反应是？", options: ["立刻抓住，绝不手软", "有点怀疑，反复确认有没有坑", "顺其自然，觉得这都是玄学", "立刻分享给信任的朋友听听意见"] },
+            { q: "如果必须抽一张塔罗牌代表你现在的状态，你会选哪种画面的？", "options": ["在悬崖边闭眼迈步的旅人（愚者）", "手握权杖掌控星辰的王（皇帝）", "在黑夜里静静发光的隐士", "两只手交握传递能量的恋人"] },
+            { q: "在你的潜意识里，未来三年你最渴望获得的是什么？", options: ["世俗意义上的绝对财富自由", "一段深刻且灵魂契合的亲密关系", "找到自己真正热爱并愿为之奋斗的事业", "内心的绝对平静与无坚不摧"] },
+            { q: "最近你经常会在哪个时间点突然感到一阵莫名的情绪涌动？", options: ["深夜万籁俱寂时", "清晨刚醒还没起床时", "黄昏日落夕阳西下时", "身处喧闹的人群中时"] },
+            { q: "如果你拥有一面可以预知未来的镜子，你最不敢看的是？", options: ["自己三年后的银行卡余额", "陪在自己身边的那个人是谁", "自己脸上的衰老痕迹", "自己是否变成了曾经讨厌的人"] },
+            { q: "面对即将到来的改变，你的身体通常会给出什么信号？", options: ["心跳加速，莫名兴奋甚至失眠", "肠胃不适，总是觉得紧张焦虑", "极度嗜睡，想把现实关在门外", "食欲大增或锐减，完全不受控制"] },
+            { q: "如果你的灵魂有一种颜色，你觉得最近它偏向于？", options: ["充满生机与野心的墨绿色", "深邃又带点神秘的星空夜蓝", "温暖治愈又闪耀的香槟金", "纯粹、包容却有些清冷的珍珠白"] },
+            { q: "你在社交平台上看到别人发了极度成功的生活，你的反应是？", options: ["默默收藏，作为自己努力的对标", "滑过去，心里毫无波澜甚至想笑", "感到焦虑，觉得自己进度太慢", "真诚点赞，相信自己也会有这一天"] },
+            { q: "如果可以给自己的人生设定一个BGM（背景音乐），你会选？", options: ["节奏强烈、燃向的高燃踩点曲", "空灵悠远、带点神秘感的环境音", "轻松欢快、充满阳光的轻音乐", "旋律复杂、充满宿命感的古典乐"] },
+            { q: "当朋友带着一个很冒险但也极其赚钱的项目来找你，你通常？", options: ["直接冲，撑死胆大的饿死胆小的", "按兵不动，先做足背调和风险评估", "委婉拒绝，觉得稳稳的幸福更重要", "拉上另一个懂行的朋友一起入局"] },
+            { q: "你觉得自己在过去的一年里，最大的消耗来源于什么？", options: ["在不值得的人或烂桃花上浪费时间", "对未来的迷茫和毫无意义的精神内耗", "太想搞钱搞事业导致的身体透支", "为了迎合别人而戴上面具的社交"] },
+            { q: "如果宇宙现在只能实现你一个小小的愿望，你会许什么？", options: ["接下来的一周都有意想不到的偏财", "出门就能遇到一个极其懂我的人", "让我今晚做一个能解答当前困惑的梦", "让讨厌的人立刻从我的世界消失"] },
+            { q: "在一段极度紧绷的时期结束后，你通常如何给自己回血？", options: ["报复性消费，买一直想买的贵东西", "断崖式失联，在家躺尸三天三夜", "约三五好友去喝顿大酒吐槽一番", "去一个充满自然能量的地方（如看海/爬山）"] },
+            { q: "深呼吸三次，闭上眼睛，你脑海里浮现的第一个字是？", options: ["『破』——打破现状，不破不立", "『稳』——以静制动，稳如泰山", "『润』——远离是非，海阔天空", "『合』——贵人相助，合作共赢"] }
+        ];
+
+        // 10个精选结果
+        const results = [
+            { 
+                name: "闷声发大财的搞钱王者", 
+                tag: "💰 财神爷追着喂饭", 
+                main: "准备好迎接账户余额飙升的快乐了吗？未来三年，你潜意识里的搞钱雷达将被彻底激活。你的主旋律是‘务实与变现’，不要抗拒那些看似辛苦的变动，顺势而为，你将以意想不到的方式获得极大的物质回报。", 
+                highlight: "在你最不经意的某个深夜或清晨，一个看似普通的副业尝试或人脉推荐，将直接打通你的任督二脉，带来爆发式的财富跃级。", 
+                advice: "收起你的讨好型人格和过度谦虚！这三年你配得上所有的好，不要因为突如其来的好运而感到‘受宠若惊’，拒绝情绪内耗，专注搞钱。" 
+            },
+            { 
+                name: "涅槃重生的六边形战士", 
+                tag: "⚔️ 绝地反击的战神", 
+                main: "未来三年，你的生命磁场将经历一次浴火重生。过去的迷茫、委屈和停滞都将被彻底打破，宇宙正在为你重塑一身铠甲。你的主旋律是‘蜕变与主宰’，无论是事业、感情还是心智，都将进化到坚不可摧的境界。", 
+                highlight: "在经历一次让你痛苦剥落的挫折后，你会迅速触底反弹，在一到两个月内完成认知觉醒，突然明白自己到底要什么，并迎来全方位的爆发。", 
+                advice: "警惕你的‘烂好人’属性！未来三年你会遇到试图消耗你的‘吸血鬼’，学会冷酷地切断无效社交，把时间留给真正有价值的人和事。" 
+            },
+            { 
+                name: "桃花朵朵开的社交万人迷", 
+                tag: "🌸 灵魂捕手", 
+                main: "未来三年，你的人际交往宫位将被全面点亮。你将散发出一种致命的松弛感与吸引力，成为圈子里的核心C位。你的主旋律是‘连接与共鸣’，你会遇到很多同频共振的灵魂，甚至遇到那个能彻底懂你的人。", 
+                highlight: "在一次你原本不想去、打扮得很随意的社交场合中，你会因为一个极其随性的举动吸引到生命中的高维贵人或绝佳正缘。", 
+                advice: "切忌来者不拒！桃花太多也容易变成‘桃花劫’。带眼识人，不要因为一时的感动或孤独，就在垃圾堆里找对象，保持高傲的筛选机制。" 
+            },
+            { 
+                name: "佛系躺赢的锦鲤本鲤", 
+                tag: "🐟 宇宙级好运玄学", 
+                main: "未来三年，命运的齿轮开始用最舒服的方式为你转动。你将告别过去那种‘使不上力’的泥沼感，迎来运势的顺流期。你的主旋律是‘松弛与接纳’，不再死磕那些执念后，你会发现整个宇宙都在为你让路。", 
+                highlight: "当你彻底放弃某个挣扎了很久的项目或感情，转身去旅游或休息时，那个你曾经求而不得的机会，会奇迹般地主动找上门来。", 
+                advice: "不要在深夜做任何重大决定！你的情绪波动和莫名其妙的责任感是你最大的敌人。学会允许一切发生，遇到烂人烂事，默念‘关我屁事’。" 
+            },
+            { 
+                name: "深藏不露的跨界奇才", 
+                tag: "🃏 打破常规的造梦者", 
+                main: "未来三年，你将打破身上所有的旧标签，迎来一段野蛮生长的时期。你的主旋律是‘跨界与颠覆’。你的直觉和灵感将达到顶峰，别人眼里的疯话，最后都会被你变成神话。", 
+                highlight: "在你尝试了一项和本职工作八竿子打不着的新爱好或副业时，它会在未来半年内迅速开花结果，甚至成为你人生的第二增长曲线。", 
+                advice: "戒掉‘拖延症’和‘想太多’。你总是计划得太完美以至于迟迟无法动身。未来三年，完成比完美更重要，先跑起来，沿途自有风景！" 
+            },
+            { 
+                name: "稳中求胜的破局者", 
+                tag: "♟️ 掌控全局的棋手", 
+                main: "未来三年，你的心智成熟度将远超同龄人。你不信玄学，你只相信握在手里的筹码。你的主旋律是‘沉淀与升维’，不赚认知以外的钱，不谈内耗自己的恋爱，每一步棋都走得稳准狠。", 
+                highlight: "在行业面临洗牌、周围人都焦虑不安的动荡期，你反而能凭借早先的布局和冷静的判断，稳稳吃下一波红利，实现阶层跨越。", 
+                advice: "切忌过度紧绷！适当放下你的‘控制欲’，不要把每个人都当成NPC。偶尔也要允许自己展现脆弱，生活需要一点计划外的惊喜。" 
+            },
+            { 
+                name: "游刃有余的游牧旅人", 
+                tag: "🌍 自由如风的探索家", 
+                main: "未来三年，你注定不会被困在原地。无论是地理位置的迁徙、工作环境的转变，还是思想维度的跳跃，你的主旋律是‘流动与自由’。去更广阔的天地吧，你的福气在远方。", 
+                highlight: "一次偶然的短途旅行或是出差，会彻底打破你原本枯燥的生活轨迹。你会因为遇到截然不同的风景和人，瞬间顿悟自己未来的方向。", 
+                advice: "不要害怕没有‘归属感’。这三年你要警惕别人用‘稳定’来道德绑架你。如果你觉得被困住了，那就果断收拾行李，跑路才是上策。" 
+            },
+            { 
+                name: "灵性觉醒的宇宙宠儿", 
+                tag: "✨ 第六感爆棚的先知", 
+                main: "未来三年，你的直觉、共情力与同频能力将达到前所未有的高度。你会发现自己像开了天眼一样，总能预判事物的发展。你的主旋律是‘觉知与灵感’，跟着直觉走，它会把你带到最高的地方。", 
+                highlight: "当你遵循内心一个看似荒谬的‘直觉冲动’（比如突然想联系某个人、突然想去某个地方）时，会精准命中命运为你准备的彩蛋。", 
+                advice: "保护好你的能量场！因为共情力太强，你很容易吸收周围人的负能量。远离那些只会抱怨的‘祥林嫂’，每天睡前做好能量清理。" 
+            },
+            { 
+                name: "清醒独立的事业狂魔", 
+                tag: "👑 无情的搞钱机器", 
+                main: "未来三年，你的眼中只有巅峰和王座。所有的儿女情长都将被你抛诸脑后，你的主旋律是‘攀登与霸业’。你将展现出极强的执行力和领导力，事业版图将以前所未有的速度扩张。", 
+                highlight: "在一个需要力挽狂澜的危机时刻，你挺身而出完美解决问题，从而直接获得上级的赏识或拿到行业内含金量极高的成就。", 
+                advice: "注意身体的‘报警信号’！你太习惯用硬扛来解决问题了。事业虽然重要，但不要以透支健康为代价。该休息时，就心安理得地躺下。" 
+            },
+            { 
+                name: "浴火重生的暗夜凤凰", 
+                tag: "🔥 越挫越勇的孤狼", 
+                main: "未来三年，你是拿了逆袭剧本的大女主/大男主。你会遇到一些考验，但这绝不是惩罚，而是宇宙在帮你淬火。你的主旋律是‘坚韧与反转’，那些杀不死你的，终将让你变得光芒万丈。", 
+                highlight: "在你觉得几乎要撑不下去、准备彻底放弃的最后一刻，剧情会发生180度的超级大反转，所有的委屈都会变成你加冕的王冠。", 
+                advice: "停止自我PUA！不要总是把失败归咎于自己不够好。原谅过去那个愚蠢或软弱的自己，斩断对旧人旧事的执念，向前看，别回头。" 
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        function startTest() {
+            const home = document.getElementById('page-home');
+            home.classList.remove('fade-in');
+            home.classList.add('fade-out');
+            
+            setTimeout(() => {
+                home.classList.add('hidden');
+                const quiz = document.getElementById('page-quiz');
+                quiz.classList.remove('hidden');
+                quiz.classList.remove('fade-out');
+                quiz.classList.add('fade-in');
+                renderQuestion();
+            }, 350);
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('q-progress').innerText = `${currentQuestion + 1} / 15`;
+            document.getElementById('q-bar').style.width = `${((currentQuestion + 1) / 15) * 100}%`;
+            document.getElementById('q-title').innerText = q.q;
+            
+            const optionsHtml = q.options.map((opt, index) => 
+                `<button onclick="selectOption(${index})" class="option-btn w-full text-left px-5 py-4 rounded-2xl text-[15px] leading-relaxed mb-4">${opt}</button>`
+            ).join('');
+            
+            document.getElementById('q-options').innerHTML = optionsHtml;
+            
+            if (currentQuestion > 0) {
+                document.getElementById('btn-prev').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-prev').classList.add('hidden');
+            }
+        }
+
+        function selectOption(index) {
+            // Hash scoring logic
+            score += index * (currentQuestion + 1) * 7 + 11;
+            
+            if (currentQuestion < 14) {
+                currentQuestion++;
+                
+                const quizDiv = document.getElementById('page-quiz');
+                quizDiv.classList.remove('fade-in');
+                quizDiv.style.opacity = '0';
+                
+                setTimeout(() => {
+                    renderQuestion();
+                    quizDiv.classList.add('fade-in');
+                    quizDiv.style.opacity = '1';
+                }, 250);
+            } else {
+                showUnlockPage();
+            }
+        }
+
+        function prevQuestion() {
+            if(document.getElementById('page-unlock').classList.contains('flex')) {
+                document.getElementById('page-unlock').classList.add('hidden');
+                document.getElementById('page-unlock').classList.remove('flex');
+                
+                const quiz = document.getElementById('page-quiz');
+                quiz.classList.remove('hidden');
+                quiz.classList.remove('fade-out');
+                quiz.classList.add('fade-in');
+                return;
+            }
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function showUnlockPage() {
+            const quiz = document.getElementById('page-quiz');
+            quiz.classList.remove('fade-in');
+            quiz.classList.add('fade-out');
+            
+            setTimeout(() => {
+                quiz.classList.add('hidden');
+                const unlock = document.getElementById('page-unlock');
+                unlock.classList.remove('hidden');
+                unlock.classList.remove('fade-out');
+                unlock.classList.add('flex', 'fade-in');
+            }, 350);
+        }
+
+        function verifyCode() {
+            const code = document.getElementById('unlock-code').value.trim();
+            const errorMsg = document.getElementById('error-msg');
+            const inputField = document.getElementById('unlock-code');
+            
+            const correctCode = typeof window.GLOBAL_PASSWORD !== 'undefined' ? window.GLOBAL_PASSWORD : '888888';
+            
+            if (code === correctCode) {
+                showStandardResult();
+            } else {
+                errorMsg.classList.remove('hidden');
+                inputField.style.borderColor = '#FF8A8A';
+                setTimeout(() => {
+                    errorMsg.classList.add('hidden');
+                    inputField.style.borderColor = 'rgba(219, 193, 139, 0.4)';
+                }, 2000);
+            }
+        }
+
+        function showStandardResult() {
+            const unlock = document.getElementById('page-unlock');
+            unlock.classList.remove('fade-in');
+            unlock.classList.add('fade-out');
+            
+            setTimeout(() => {
+                unlock.classList.add('hidden');
+                unlock.classList.remove('flex');
+                
+                const result = document.getElementById('page-result');
+                result.classList.remove('hidden');
+                result.classList.add('fade-in');
+                
+                const index = score % results.length; 
+                const res = results[index];
+                
+                document.getElementById('res-name').innerText = res.name;
+                document.getElementById('res-tag').innerText = res.tag;
+                document.getElementById('res-main').innerText = res.main;
+                document.getElementById('res-highlight').innerText = res.highlight;
+                document.getElementById('res-advice').innerText = res.advice;
+            }, 350);
+        }
+    </script>
+</body>
+</html>
